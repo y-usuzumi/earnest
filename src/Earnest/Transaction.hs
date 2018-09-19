@@ -6,15 +6,18 @@ import           Control.Monad
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 
-newtype Transaction m n r = Transaction { action :: (MonadIO m, MonadThrow n) => m (n r)
-                                        } deriving Functor
+newtype Transaction n r = Transaction { action :: MonadThrow n => n r
+                                      } deriving Functor
 
-instance Applicative (Transaction m n) where
-  pure a = Transaction $ return $ return a
+instance Monad n => Applicative (Transaction n) where
+  pure a = Transaction $ return a
   (<*>) = ap
 
-instance Monad (Transaction m n) where
-  (>>=) = undefined
+instance Monad n => Monad (Transaction n) where
+  Transaction action >>= f = Transaction $ do
+    action >>= \r -> do
+      let Transaction next = f r
+      next
 
 data CreateOrderException deriving Show
 
