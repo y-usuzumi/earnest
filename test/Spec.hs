@@ -1,2 +1,9 @@
+import qualified Earnest.Transaction.Tests as T
+import           Test.Tasty
+
+tests :: TestTree
+tests = testGroup "all tests" [ T.tests
+                              ]
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = defaultMain tests

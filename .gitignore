@@ -1,3 +1,6 @@
 .stack-work/
 earnest.cabal
 *~
+
+# Emacs
+.dir-locals.el

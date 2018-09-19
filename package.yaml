@@ -22,10 +22,14 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - async
 - base >= 4.7 && < 5
+- exceptions
+- tasty
+- tasty-hunit
 
 default-extensions:
 - DeriveFunctor
 - EmptyDataDeriving
+- RankNTypes
 - RecordWildCards
 
 library:

@@ -1,7 +1,8 @@
 module Earnest.Exchange where
 
-import Earnest.Order
+import           Earnest.Order
+import           Earnest.Transaction
 
 
 class Exchange e where
-  createOrder :: Order -> Transaction ()
+  createOrder :: e -> Order -> Transaction ()
