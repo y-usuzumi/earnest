@@ -4,20 +4,18 @@ import           Control.Concurrent.Async
 import           Control.Exception
 import           Control.Monad
 import           Control.Monad.Catch
+import           Control.Monad.IO.Class
 
-newtype Transaction r = Transaction { action :: forall m. MonadThrow m => m r
-                                    } deriving Functor
+newtype Transaction m n r = Transaction { action :: (MonadIO m, MonadThrow n) => m (n r)
+                                        } deriving Functor
 
-data TransactionException deriving Show
+instance Applicative (Transaction m n) where
+  pure a = Transaction $ return $ return a
+  (<*>) = ap
 
-instance Exception TransactionException
+instance Monad (Transaction m n) where
+  (>>=) = undefined
 
--- instance Applicative Transaction where
---   pure = return
---   (<*>) = ap
+data CreateOrderException deriving Show
 
--- instance Monad Transaction where
---   Transaction{..} >>= f = do
---     result <- async action
---     case result of
---       Left ex -> return $ Left ex
+instance Exception CreateOrderException
