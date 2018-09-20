@@ -6,21 +6,22 @@ import           Control.Monad
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 
-newtype Transaction r = Transaction { action :: forall m n. (MonadIO m, MonadThrow n) => m (n r)
+newtype Transaction r = Transaction { runTransaction :: forall m. (MonadIO m, MonadThrow m) => m r
                                     } deriving Functor
 
 instance Applicative Transaction where
-  pure a = Transaction $ return $ return a
+  pure a = Transaction $ return a
   (<*>) = ap
 
 instance Monad Transaction where
-  Transaction action >>= f = join $ fmap (join . fmap f) action
+  Transaction t >>= f = Transaction $ t >>= \r ->
+    let Transaction next = f r in next
 
 instance MonadIO Transaction where
-  liftIO io = Transaction $ liftIO $ fmap return io
+  liftIO io = Transaction $ liftIO io
 
 instance MonadThrow Transaction where
-  throwM e = Transaction $ return $ throwM e
+  throwM e = Transaction $ throwM e
 
 data CreateOrderException deriving Show
 
