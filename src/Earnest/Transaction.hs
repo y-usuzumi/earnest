@@ -5,6 +5,7 @@ import           Control.Exception
 import           Control.Monad
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
+import           Control.Monad.IO.Unlift
 
 newtype Transaction r = Transaction { runTransaction :: forall m. (MonadIO m, MonadThrow m) => m r
                                     } deriving Functor
@@ -23,6 +24,10 @@ instance MonadIO Transaction where
 instance MonadThrow Transaction where
   throwM e = Transaction $ throwM e
 
-data CreateOrderException deriving Show
+instance MonadUnliftIO Transaction where
+  withRunInIO runM = runM $ \runner -> do
+    runner
 
-instance Exception CreateOrderException
+parallel :: Transaction a -> Transaction b -> Transaction (a, b)
+parallel ta tb = do
+  askUnliftIO

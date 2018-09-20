@@ -25,6 +25,8 @@ dependencies:
 - exceptions
 - tasty
 - tasty-hunit
+- unliftio-core
+- unliftio
 
 default-extensions:
 - DeriveFunctor
