@@ -23,11 +23,3 @@ instance MonadIO Transaction where
 
 instance MonadThrow Transaction where
   throwM e = Transaction $ throwM e
-
-instance MonadUnliftIO Transaction where
-  withRunInIO runM = runM $ \runner -> do
-    runner
-
-parallel :: Transaction a -> Transaction b -> Transaction (a, b)
-parallel ta tb = do
-  askUnliftIO

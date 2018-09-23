@@ -20,7 +20,7 @@ merge pairs = do
     insertPair lookup pair =
       HM.insertWith S.union (fst pair) (S.singleton $ snd pair) lookup
 
-isSupported :: Currency -> Currency -> ExchangePairLookup -> Bool
-isSupported a b m
+isSupported :: (Currency, Currency) -> ExchangePairLookup -> Bool
+isSupported (a, b) m
   | not (a `HM.member` m) = False
   | otherwise = let s = m HM.! a in b `S.member` s

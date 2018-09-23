@@ -12,5 +12,5 @@ testCreateOrder = testCase "createOrder" $ do
     liftIO $ putStrLn "GG"
 
 tests :: TestTree
-tests = testGroup "transaction" [ testCreateOrder
+tests = testGroup "Transaction" [ testCreateOrder
                                 ]
