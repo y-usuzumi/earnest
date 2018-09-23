@@ -3,4 +3,5 @@ earnest.cabal
 *~
 
 # Emacs
+.#*
 .dir-locals.el

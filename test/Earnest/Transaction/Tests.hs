@@ -3,7 +3,6 @@ module Earnest.Transaction.Tests where
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Earnest.Transaction
-import           Earnest.Transaction
 import           Test.Tasty
 import           Test.Tasty.HUnit
 

@@ -22,17 +22,23 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - async
 - base >= 4.7 && < 5
+- containers
 - exceptions
+- hashable
+- mtl
 - tasty
 - tasty-hunit
 - unliftio-core
 - unliftio
+- unordered-containers
 
 default-extensions:
 - DeriveFunctor
+- DeriveGeneric
 - EmptyDataDeriving
 - RankNTypes
 - RecordWildCards
+- TypeFamilies
 
 library:
   source-dirs: src
