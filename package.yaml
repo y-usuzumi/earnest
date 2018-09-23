@@ -25,17 +25,19 @@ dependencies:
 - containers
 - exceptions
 - hashable
+- monad-control
 - mtl
 - tasty
 - tasty-hunit
 - unliftio-core
 - unliftio
 - unordered-containers
+- webdriver
 
 default-extensions:
 - DeriveFunctor
 - DeriveGeneric
-- EmptyDataDeriving
+- OverloadedStrings
 - RankNTypes
 - RecordWildCards
 - TypeFamilies
