@@ -13,7 +13,9 @@ import           Earnest.Transaction
 
 
 class Exchange e where
-  loadInitialInfo :: MonadIO m => e -> m ExchangeInfo
+  type ExchangeEnv e
+
+  loadInitialInfo :: MonadIO m => e -> ExchangeEnv e -> m ExchangeInfo
 
 data ExchangeInfo = ExchangeInfo { supportedCurrencyPairs :: ExchangePairLookup
                                  }

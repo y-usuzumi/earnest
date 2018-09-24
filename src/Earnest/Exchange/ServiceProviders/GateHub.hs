@@ -1,5 +1,6 @@
 module Earnest.Exchange.ServiceProviders.GateHub
   ( GateHubExchange(..)
+  , GateHubExchangeEnv(..)
   ) where
 
 import           Control.Concurrent
@@ -13,19 +14,6 @@ import           Earnest.Exchange.CurrencyPair
 import           System.Environment
 import           Test.WebDriver                hiding (browser)
 import           Test.WebDriver.Commands.Wait
-
-data Env = Env { username :: String
-               , password :: String
-               }
-
-initEnv :: IO Env
-initEnv = do
-  username <- liftIO $ getEnv "EARNEST_SERVICEPROVIDER_GATEHUB_USERNAME"
-  password <- liftIO $ getEnv "EARNEST_SERVICEPROVIDER_GATEHUB_PASSWORD"
-  return Env{ username = username
-            , password = password
-            }
-
 
 browser :: Browser
 browser = chrome{ chromeOptions = ["--proxy-server=socks5://localhost:1080"]
@@ -42,10 +30,14 @@ wdConfig = foldl' (flip ($)) defaultConfig
 
 data GateHubExchange = GateHubExchange
 
+data GateHubExchangeEnv = GateHubExchangeEnv { username :: String
+                                             , password :: String
+                                             }
 
 instance Exchange GateHubExchange where
-  loadInitialInfo _ = do
-    Env{..} <- liftIO initEnv
+  type ExchangeEnv GateHubExchange = GateHubExchangeEnv
+
+  loadInitialInfo _ GateHubExchangeEnv{..} = do
     liftIO $ void $ runSession wdConfig . finallyClose $ do
       openPage "https://signin.gatehub.net/"
       elemUsername <- findElem $ ByName "gatehub_name"
