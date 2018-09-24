@@ -4,11 +4,13 @@ module Earnest.Exchange.ServiceProviders.AEX
   ) where
 
 import           Control.Concurrent
+import           Control.Monad.Catch
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
 import           Data.Hashable                 (Hashable)
 import qualified Data.HashMap.Strict           as HM
 import           Data.List
+import           Data.Maybe
 import qualified Data.Text                     as T
 import qualified Data.Text.IO                  as TIO
 import           Earnest.Currency
@@ -60,13 +62,16 @@ instance Exchange AEXExchange where
       click elemSubmit
       waitUntil 30 $ findElem $ ByClass "overview"
       openPage $ aexPageList HM.! AEXPersonalCenter
-      getCurrencyPairs
+      currencyPairs <- getCurrencyPairs
+      liftIO $ print currencyPairs
+      return currencyPairs
       -- control $ \runInIO -> do
       --   runInIO $ liftIO $ threadDelay 20000000
     return ExchangeInfo{ supportedCurrencyPairs = fromList currencyPairs
                        }
 
     where
+      getCurrencyPairs :: WD [(Currency, Currency)]
       getCurrencyPairs = do
         elemBalance <- findElem $ ById "myBalance"
         elemRegularAccountTabBtn <- findElemFrom elemBalance $ ByClass "nav-1"
@@ -75,6 +80,18 @@ instance Exchange AEXExchange where
           runInIO $ liftIO $ threadDelay 1000000
         elemTable <- findElemFrom elemBalance (ByClass "table")
         elemRows <- findElemsFrom elemTable (ByTag "dd")
-        currencies <- forM elemRows $ \elemRow -> do
-          getText elemRow >>= liftIO . TIO.putStrLn
-        return []
+        fmap join $ forM elemRows $ \elemRow -> do
+          elemPairs <- (findElemFrom elemRow (ByClass "markets_link") >>= \r -> do
+                           findElemsFrom r (ByTag "li"))
+            `catch` \(FailedCommand t _) ->
+            case t of
+              NoSuchElement -> return []
+              _             -> liftIO $ print t >> return []
+          cleanedPairs <- forM elemPairs (
+            \elemPair -> fmap fromJust $ attr elemPair "innerHTML"
+            ) >>= return . filter (not . T.null)
+          forM cleanedPairs $ \elemPair -> do
+            let pair = T.splitOn "/" elemPair
+            case pair of
+              (a:b:_) -> return (read $ T.unpack a, read $ T.unpack b)
+              _       -> liftIO $ print pair >> error "WTF"

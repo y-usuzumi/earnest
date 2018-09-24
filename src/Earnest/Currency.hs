@@ -7,6 +7,6 @@ data Currency = CNY
               | USD
               | BTC
               | XRP
-              deriving (Eq, Generic, Show)
+              deriving (Eq, Generic, Read, Show)
 
 instance Hashable Currency
