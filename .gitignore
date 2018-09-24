@@ -1,6 +1,7 @@
 .stack-work/
 earnest.cabal
 *~
+.env
 
 # Emacs
 .#*

@@ -29,6 +29,7 @@ dependencies:
 - mtl
 - tasty
 - tasty-hunit
+- text
 - unliftio-core
 - unliftio
 - unordered-containers
