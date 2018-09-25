@@ -7,12 +7,12 @@ import           Control.Concurrent
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
 import           Data.List
-import qualified Data.Text                     as T
+import qualified Data.Text                    as T
 import           Earnest.Currency
 import           Earnest.Exchange
-import           Earnest.Exchange.CurrencyPair
+import           Earnest.Exchange.TradeInfo
 import           System.Environment
-import           Test.WebDriver                hiding (browser)
+import           Test.WebDriver               hiding (browser)
 import           Test.WebDriver.Commands.Wait
 
 browser :: Browser
@@ -48,5 +48,5 @@ instance Exchange GateHubExchange where
       submit elemForm
       control $ \runInIO -> do
         runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ supportedCurrencyPairs = newExchangePairLookup
+    return ExchangeInfo{ supportedTrades = newTradeInfoLookup
                        }

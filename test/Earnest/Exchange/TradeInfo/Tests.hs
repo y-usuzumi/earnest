@@ -1,18 +1,18 @@
-module Earnest.Exchange.CurrencyPair.Tests where
+module Earnest.Exchange.TradeInfo.Tests where
 
 import           Control.Monad.State
 import           Earnest.Currency
-import           Earnest.Exchange.CurrencyPair
+import           Earnest.Exchange.TradeInfo
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
 testSupports :: TestTree
 testSupports = testCase "isSupported" $ do
-  let newLookup = flip execState newExchangePairLookup $ do
-        merge [ (CNY, XRP)
-              , (CNY, BTC)
-              , (BTC, XRP)
-              , (BTC, CNY)
+  let newLookup = flip execState newTradeInfoLookup $ do
+        merge [ (CNY, XRP, undefined)
+              , (CNY, BTC, undefined)
+              , (BTC, XRP, undefined)
+              , (BTC, CNY, undefined)
               ]
   assertBool "Should support CNY -> XRP" (isSupported (CNY, XRP) newLookup)
   assertBool "Should support CNY -> BTC" (isSupported (CNY, BTC) newLookup)

@@ -7,18 +7,18 @@ import           Control.Concurrent
 import           Control.Monad.Catch
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
-import           Data.Hashable                 (Hashable)
-import qualified Data.HashMap.Strict           as HM
+import           Data.Hashable                (Hashable)
+import qualified Data.HashMap.Strict          as HM
 import           Data.List
 import           Data.Maybe
-import qualified Data.Text                     as T
-import qualified Data.Text.IO                  as TIO
+import qualified Data.Text                    as T
+import qualified Data.Text.IO                 as TIO
 import           Earnest.Currency
 import           Earnest.Exchange
-import           Earnest.Exchange.CurrencyPair
+import           Earnest.Exchange.TradeInfo
 import           GHC.Generics
 import           System.Environment
-import           Test.WebDriver                hiding (browser)
+import           Test.WebDriver               hiding (browser)
 import           Test.WebDriver.Commands.Wait
 
 browser :: Browser
@@ -67,7 +67,7 @@ instance Exchange AEXExchange where
       return currencyPairs
       -- control $ \runInIO -> do
       --   runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ supportedCurrencyPairs = fromList currencyPairs
+    return ExchangeInfo{ supportedTrades = newTradeInfoLookup
                        }
 
     where

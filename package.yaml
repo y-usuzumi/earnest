@@ -36,6 +36,7 @@ dependencies:
 - webdriver
 
 default-extensions:
+- DeriveAnyClass
 - DeriveFunctor
 - DeriveGeneric
 - OverloadedStrings
