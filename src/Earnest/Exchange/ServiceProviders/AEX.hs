@@ -11,6 +11,7 @@ import           Data.Hashable                (Hashable)
 import qualified Data.HashMap.Strict          as HM
 import           Data.List
 import           Data.Maybe
+import           Data.Maybe
 import qualified Data.Text                    as T
 import qualified Data.Text.IO                 as TIO
 import           Earnest.Currency
@@ -20,6 +21,7 @@ import           GHC.Generics
 import           System.Environment
 import           Test.WebDriver               hiding (browser)
 import           Test.WebDriver.Commands.Wait
+import           Text.Printf
 
 browser :: Browser
 browser = chrome{ chromeOptions = ["--proxy-server=socks5://localhost:1080"]
@@ -88,10 +90,11 @@ instance Exchange AEXExchange where
               NoSuchElement -> return []
               _             -> liftIO $ print t >> return []
           cleanedPairs <- forM elemPairs (
-            \elemPair -> fmap fromJust $ attr elemPair "innerHTML"
+            \elemPair -> fmap fromJust $ attr elemPair "innerText"
             ) >>= return . filter (not . T.null)
-          forM cleanedPairs $ \elemPair -> do
+          maybeValidPairs <- forM cleanedPairs $ \elemPair -> do
             let pair = T.splitOn "/" elemPair
             case pair of
-              (a:b:_) -> return (read $ T.unpack a, read $ T.unpack b)
-              _       -> liftIO $ print pair >> error "WTF"
+              (a:b:_) -> return $ Just (read $ T.unpack a, read $ T.unpack b)
+              _       -> liftIO $ printf "Invalid currency pair input: %s" elemPair >> return Nothing
+          return $ catMaybes maybeValidPairs
