@@ -22,6 +22,7 @@ testAEX :: TestTree
 testAEX = testCase "AEX" $ do
   env <- initAEXEnv
   ei <- loadInitialInfo AEXExchange env
+  print ei
   return ()
 
 -- GateHub

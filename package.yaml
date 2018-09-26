@@ -43,6 +43,7 @@ default-extensions:
 - OverloadedStrings
 - RankNTypes
 - RecordWildCards
+- ScopedTypeVariables
 - TypeFamilies
 
 library:

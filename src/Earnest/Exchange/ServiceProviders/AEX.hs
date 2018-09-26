@@ -5,6 +5,7 @@ module Earnest.Exchange.ServiceProviders.AEX
 
 import           Control.Concurrent
 import           Control.Monad.Catch
+import           Control.Monad.Cont
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
 import           Data.Hashable                (Hashable)
@@ -17,6 +18,7 @@ import qualified Data.Text.IO                 as TIO
 import           Earnest.Currency
 import           Earnest.Exchange
 import           Earnest.Exchange.TradeInfo
+import           Earnest.WebDriver.Utils
 import           GHC.Generics
 import           System.Environment
 import           Test.WebDriver               hiding (browser)
@@ -64,6 +66,7 @@ instance Exchange AEXExchange where
       click elemSubmit
       waitUntil 30 $ findElem $ ByClass "overview"
       openPage $ aexPageList HM.! AEXPersonalCenter
+      liftIO $ putStrLn "Getting currency info"
       currencyPairs <- getCurrencyPairs
       liftIO $ print currencyPairs
       return currencyPairs
@@ -75,26 +78,36 @@ instance Exchange AEXExchange where
     where
       getCurrencyPairs :: WD [(Currency, Currency)]
       getCurrencyPairs = do
+        liftIO $ putStrLn "Finding myBalance page"
         elemBalance <- findElem $ ById "myBalance"
+        liftIO $ putStrLn "Finding nav-1 tab"
         elemRegularAccountTabBtn <- findElemFrom elemBalance $ ByClass "nav-1"
+        liftIO $ putStrLn "Clicking on this tab"
         click elemRegularAccountTabBtn
-        control $ \runInIO -> do
-          runInIO $ liftIO $ threadDelay 1000000
-        elemTable <- findElemFrom elemBalance (ByClass "table")
-        elemRows <- findElemsFrom elemTable (ByTag "dd")
-        fmap join $ forM elemRows $ \elemRow -> do
-          elemPairs <- (findElemFrom elemRow (ByClass "markets_link") >>= \r -> do
-                           findElemsFrom r (ByTag "li"))
-            `catch` \(FailedCommand t _) ->
-            case t of
-              NoSuchElement -> return []
-              _             -> liftIO $ print t >> return []
-          cleanedPairs <- forM elemPairs (
-            \elemPair -> fmap fromJust $ attr elemPair "innerText"
-            ) >>= return . filter (not . T.null)
-          maybeValidPairs <- forM cleanedPairs $ \elemPair -> do
-            let pair = T.splitOn "/" elemPair
-            case pair of
-              (a:b:_) -> return $ Just (read $ T.unpack a, read $ T.unpack b)
-              _       -> liftIO $ printf "Invalid currency pair input: %s" elemPair >> return Nothing
-          return $ catMaybes maybeValidPairs
+        retry 5 $ do
+          liftIO $ putStrLn "Finding the table <dl>"
+          elemTable <- waitUntil 30 $ findElemFrom elemBalance (ByTag "dl")
+          liftIO $ putStrLn "Finding rows <dd>"
+          liftIO $ threadDelay 1000000
+          elemRows <- waitUntil 30 $ findElemsFrom elemTable (ByTag "dd")
+          fmap join $ forM elemRows $ \elemRow -> (`runContT` id) $ do
+            response <- callCC $ \exit -> do
+              lift $ liftIO $ putStrLn "Finding markets_link"
+              maybeElemMarketLink <- lift $ maybeNotFound $ findElemFrom elemRow (ByClass "markets_link")
+              when (isNothing maybeElemMarketLink) $ exit []
+              let (Just elemMarketLink) = maybeElemMarketLink
+              liftIO $ putStrLn "Finding <li>'s'"
+              maybeElemPairs <- lift $ maybeNotFound $ findElemsFrom elemMarketLink (ByTag "li")
+              when (isNothing maybeElemPairs) $ exit []
+              let (Just elemPairs) = maybeElemPairs
+              lift $ do
+                cleanedPairs <- forM elemPairs (
+                  \elemPair -> fmap fromJust $ attr elemPair "innerText"
+                  ) >>= return . filter (not . T.null)
+                maybeValidPairs <- forM cleanedPairs $ \elemPair -> do
+                  let pair = T.splitOn "/" elemPair
+                  case pair of
+                    (a:b:_) -> return $ Just (read $ T.unpack a, read $ T.unpack b)
+                    _       -> liftIO $ printf "Invalid currency pair input: %s" elemPair >> return Nothing
+                return $ catMaybes maybeValidPairs
+            return $ return response

@@ -18,4 +18,4 @@ class Exchange e where
   loadInitialInfo :: MonadIO m => e -> ExchangeEnv e -> m ExchangeInfo
 
 data ExchangeInfo = ExchangeInfo { supportedTrades :: TradeInfoLookup
-                                 }
+                                 } deriving Show
