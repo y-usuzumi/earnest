@@ -1,16 +1,17 @@
 module Earnest.Exchange.ServiceProviders.GateHub
   ( GateHubExchange(..)
-  , GateHubExchangeEnv(..)
   ) where
 
 import           Control.Concurrent
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
+import           Data.Hashable
 import           Data.List
 import qualified Data.Text                    as T
 import           Earnest.Currency
 import           Earnest.Exchange
 import           Earnest.Exchange.TradeInfo
+import           GHC.Generics
 import           System.Environment
 import           Test.WebDriver               hiding (browser)
 import           Test.WebDriver.Commands.Wait
@@ -28,16 +29,14 @@ wdConfig = foldl' (flip ($)) defaultConfig
   --                     }
   ]
 
-data GateHubExchange = GateHubExchange
+data GateHubExchange = GateHubExchange { username :: String
+                                       , password :: String
+                                       } deriving (Eq, Generic, Show)
 
-data GateHubExchangeEnv = GateHubExchangeEnv { username :: String
-                                             , password :: String
-                                             }
+instance Hashable GateHubExchange
 
 instance Exchange GateHubExchange where
-  type ExchangeEnv GateHubExchange = GateHubExchangeEnv
-
-  loadInitialInfo _ GateHubExchangeEnv{..} = do
+  loadInfo GateHubExchange{..} = do
     liftIO $ void $ runSession wdConfig . finallyClose $ do
       openPage "https://signin.gatehub.net/"
       elemUsername <- findElem $ ByName "gatehub_name"

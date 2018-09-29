@@ -10,35 +10,35 @@ import           Test.Tasty.HUnit
 
 -- AEX
 
-initAEXEnv :: IO AEXExchangeEnv
-initAEXEnv = do
+initAEX :: IO AEXExchange
+initAEX = do
   username <- liftIO $ getEnv "EARNEST_SERVICEPROVIDER_AEX_USERNAME"
   password <- liftIO $ getEnv "EARNEST_SERVICEPROVIDER_AEX_PASSWORD"
-  return AEXExchangeEnv{ username = username
-                       , password = password
-                       }
+  return AEXExchange{ username = username
+                    , password = password
+                    }
 
 testAEX :: TestTree
 testAEX = testCase "AEX" $ do
-  env <- initAEXEnv
-  ei <- loadInitialInfo AEXExchange env
+  aex <- initAEX
+  ei <- loadInfo aex
   print ei
   return ()
 
 -- GateHub
 
-initGateHubEnv :: IO GateHubExchangeEnv
+initGateHubEnv :: IO GateHubExchange
 initGateHubEnv = do
   username <- liftIO $ getEnv "EARNEST_SERVICEPROVIDER_GATEHUB_USERNAME"
   password <- liftIO $ getEnv "EARNEST_SERVICEPROVIDER_GATEHUB_PASSWORD"
-  return GateHubExchangeEnv{ username = username
-                           , password = password
-                           }
+  return GateHubExchange{ username = username
+                        , password = password
+                        }
 
 testGateHub :: TestTree
 testGateHub = testCase "GateHub" $ do
-  env <- initGateHubEnv
-  ei <- loadInitialInfo GateHubExchange env
+  gateHub <- initGateHubEnv
+  ei <- loadInfo gateHub
   return ()
 
 tests :: TestTree

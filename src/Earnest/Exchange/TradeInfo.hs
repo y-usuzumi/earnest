@@ -35,3 +35,7 @@ isSupported :: (Currency, Currency) -> TradeInfoLookup -> Bool
 isSupported (a, b) m
   | not (a `HM.member` m) = False
   | otherwise = let s = m HM.! a in b `HM.member` s
+
+toList :: TradeInfoLookup -> [(Currency, Currency, TradeInfo)]
+toList til = join $ map (\(k1, m) -> map (\(k2, ti) -> (k1, k2, ti)) $ HM.toList m) $
+             HM.toList til

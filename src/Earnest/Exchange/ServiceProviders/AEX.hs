@@ -1,6 +1,5 @@
 module Earnest.Exchange.ServiceProviders.AEX
   ( AEXExchange(..)
-  , AEXExchangeEnv(..)
   ) where
 
 import           Control.Concurrent
@@ -46,16 +45,14 @@ aexPageList = HM.fromList
   , (AEXPersonalCenter, "https://www.aex.com/page/person_center.html")
   ]
 
-data AEXExchange = AEXExchange
+data AEXExchange = AEXExchange { username :: String
+                               , password :: String
+                               } deriving (Eq, Generic, Show)
 
-data AEXExchangeEnv = AEXExchangeEnv { username :: String
-                                     , password :: String
-                                     }
+instance Hashable AEXExchange
 
 instance Exchange AEXExchange where
-  type ExchangeEnv AEXExchange = AEXExchangeEnv
-
-  loadInitialInfo _ AEXExchangeEnv{..} = do
+  loadInfo AEXExchange{..} = do
     currencyPairs <- liftIO $ runSession wdConfig . finallyClose $ do
       openPage $ aexPageList HM.! AEXLogin
       elemUsername <- findElem $ ById "my_self_email"
