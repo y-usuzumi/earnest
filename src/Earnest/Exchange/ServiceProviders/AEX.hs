@@ -72,7 +72,7 @@ instance Exchange AEXExchange where
       return currencyPairs
       -- control $ \runInIO -> do
       --   runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ supportedTrades = newTradeInfoLookup
+    return ExchangeInfo{ _supportedTrades = newTradeInfoLookup
                        }
 
     where

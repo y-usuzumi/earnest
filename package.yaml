@@ -28,6 +28,7 @@ dependencies:
 - lens
 - monad-control
 - mtl
+- streamly==0.4.1
 - tasty
 - tasty-hunit
 - text
@@ -40,10 +41,14 @@ default-extensions:
 - DeriveAnyClass
 - DeriveFunctor
 - DeriveGeneric
+- FlexibleContexts
+- FlexibleInstances
+- GADTs
 - OverloadedStrings
 - RankNTypes
 - RecordWildCards
 - ScopedTypeVariables
+- TemplateHaskell
 - TypeFamilies
 
 library:

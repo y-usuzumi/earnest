@@ -48,5 +48,5 @@ instance Exchange GateHubExchange where
       submit elemForm
       control $ \runInIO -> do
         runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ supportedTrades = newTradeInfoLookup
+    return ExchangeInfo{ _supportedTrades = newTradeInfoLookup
                        }
