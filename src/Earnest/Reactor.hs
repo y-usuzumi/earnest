@@ -29,8 +29,8 @@ makeLenses ''Reactor
 
 runReactor :: ( IsStream s
               , MonadTrans s
-              , MonadIO mio
               , MonadIO (s m)
+              , Monad mio
               , m ~ StateT Reactor mio
               ) => s (StateT Reactor mio) Ron
 runReactor = do
