@@ -10,9 +10,7 @@ import           GHC.Generics
 
 type TradeInfoLookup = HM.HashMap Currency (HM.HashMap Currency TradeInfo)
 
-data TradeInfo = TradeInfo { fromCurrency :: Currency
-                           , toCurrency   :: Currency
-                           , fee          :: Double
+data TradeInfo = TradeInfo { fee          :: Double
                            } deriving (Eq, Generic, Hashable, Show)
 
 newTradeInfoLookup :: TradeInfoLookup

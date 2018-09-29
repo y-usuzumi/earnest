@@ -12,16 +12,24 @@ import           Earnest.Currency
 import           Earnest.Exchange.TradeInfo
 import           Earnest.Transaction
 
-class (Eq e, Hashable e, Typeable e) => Exchange e where
+class (Ord e, Hashable e, Typeable e) => Exchange e where
   loadInfo :: MonadIO m => e -> m ExchangeInfo
 
 data HExchange where
   HExchange :: Exchange e => e -> HExchange
 
+instance Hashable HExchange where
+  hashWithSalt a (HExchange e) = hashWithSalt a e
+
 instance Eq HExchange where
   HExchange a == HExchange b = case cast b of
     Just b' -> a == b'
     Nothing -> False
+
+instance Ord HExchange where
+  compare (HExchange a) (HExchange b) = case cast b of
+    Just b' -> compare a b'
+    Nothing -> compare (typeOf a) (typeOf b)
 
 data ExchangeInfo = ExchangeInfo { _supportedTrades :: TradeInfoLookup
                                  } deriving Show

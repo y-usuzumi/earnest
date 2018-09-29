@@ -9,8 +9,6 @@ import qualified Streamly.Prelude    as S
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-data Exchange1 = Exchange1 { }
-
 testReactor :: TestTree
 testReactor = testCase "reactor" $ do
   let zeroReactor = Reactor { _exchanges = []

@@ -31,7 +31,7 @@ wdConfig = foldl' (flip ($)) defaultConfig
 
 data GateHubExchange = GateHubExchange { username :: String
                                        , password :: String
-                                       } deriving (Eq, Generic, Show)
+                                       } deriving (Eq, Generic, Ord, Show)
 
 instance Hashable GateHubExchange
 

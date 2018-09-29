@@ -83,6 +83,6 @@ data Currency = AE
               | XZC
               | YOYO
               | ZCC
-              deriving (Eq, Generic, Read, Show)
+              deriving (Eq, Generic, Ord, Read, Show)
 
 instance Hashable Currency
