@@ -14,9 +14,9 @@ import           Data.Maybe
 import           Data.Maybe
 import qualified Data.Text                    as T
 import qualified Data.Text.IO                 as TIO
-import           Earnest.Currency
-import           Earnest.Exchange
-import           Earnest.Exchange.TradeInfo
+import           Data.Earnest.Currency
+import           Data.Earnest.Exchange
+import           Data.Earnest.Exchange.TradeInfo
 import           Earnest.WebDriver.Utils
 import           GHC.Generics
 import           System.Environment

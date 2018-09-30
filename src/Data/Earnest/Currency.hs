@@ -1,4 +1,4 @@
-module Earnest.Currency where
+module Data.Earnest.Currency where
 
 import           Data.Hashable
 import           GHC.Generics  (Generic)

@@ -1,8 +1,8 @@
-module Earnest.Action where
+module Data.Earnest.Action where
 
 import           Control.Lens
-import           Earnest.Currency
-import           Earnest.Exchange
+import           Data.Earnest.Currency
+import           Data.Earnest.Exchange
 
 
 data Action where

@@ -1,11 +1,11 @@
-module Earnest.Exchange.TradeInfo where
+module Data.Earnest.Exchange.TradeInfo where
 
 import           Control.Monad.State
 import           Data.Hashable
 import qualified Data.HashMap.Lazy   as HM
 import qualified Data.HashSet        as S
 import           Data.List
-import           Earnest.Currency
+import           Data.Earnest.Currency
 import           GHC.Generics
 
 type TradeInfoLookup = HM.HashMap Currency (HM.HashMap Currency TradeInfo)

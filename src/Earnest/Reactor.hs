@@ -6,8 +6,8 @@ import           Control.Monad
 import           Control.Monad.IO.Class
 import           Control.Monad.State
 import           Data.Foldable
-import           Earnest.Action
-import           Earnest.Exchange
+import           Data.Earnest.Action
+import           Data.Earnest.Exchange
 import           Streamly               as S
 import qualified Streamly.Prelude       as SP
 

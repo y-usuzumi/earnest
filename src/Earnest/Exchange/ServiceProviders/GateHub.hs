@@ -8,9 +8,9 @@ import           Control.Monad.Trans.Control
 import           Data.Hashable
 import           Data.List
 import qualified Data.Text                    as T
-import           Earnest.Currency
-import           Earnest.Exchange
-import           Earnest.Exchange.TradeInfo
+import           Data.Earnest.Currency
+import           Data.Earnest.Exchange
+import           Data.Earnest.Exchange.TradeInfo
 import           GHC.Generics
 import           System.Environment
 import           Test.WebDriver               hiding (browser)

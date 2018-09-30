@@ -1,11 +1,11 @@
-module Earnest.Strategy.Tests where
+module Data.Earnest.EGraph.Tests where
 
 import           Control.Arrow
 import           Data.Hashable
-import           Earnest.Currency
-import           Earnest.Exchange
-import           Earnest.Exchange.TradeInfo
-import           Earnest.Strategy
+import           Data.Earnest.Currency
+import           Data.Earnest.Exchange
+import           Data.Earnest.Exchange.TradeInfo
+import           Data.Earnest.EGraph
 import           GHC.Generics
 import           Test.Tasty
 import           Test.Tasty.HUnit
@@ -48,5 +48,5 @@ testGraphFromExchanges = testCase "graphFromExchanges" $ do
   length (getTradableOptions BTS g) @?= 0
 
 tests :: TestTree
-tests = testGroup "Strategy" [ testGraphFromExchanges
-                             ]
+tests = testGroup "EGaph" [ testGraphFromExchanges
+                          ]

@@ -1,8 +1,8 @@
-module Earnest.Transaction.Tests where
+module Data.Earnest.Transaction.Tests where
 
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
-import           Earnest.Transaction
+import           Data.Earnest.Transaction
 import           Test.Tasty
 import           Test.Tasty.HUnit
 

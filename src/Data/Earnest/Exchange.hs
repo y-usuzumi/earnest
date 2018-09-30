@@ -1,4 +1,4 @@
-module Earnest.Exchange where
+module Data.Earnest.Exchange where
 
 import           Control.Lens
 import           Control.Monad.Catch
@@ -8,9 +8,9 @@ import           Data.Hashable
 import qualified Data.HashMap.Strict        as HM
 import qualified Data.Set                   as S
 import           Data.Typeable
-import           Earnest.Currency
-import           Earnest.Exchange.TradeInfo
-import           Earnest.Transaction
+import           Data.Earnest.Currency
+import           Data.Earnest.Exchange.TradeInfo
+import           Data.Earnest.Transaction
 
 class (Ord e, Hashable e, Typeable e) => Exchange e where
   loadInfo :: MonadIO m => e -> m ExchangeInfo

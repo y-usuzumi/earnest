@@ -1,4 +1,4 @@
-module Earnest.Transaction where
+module Data.Earnest.Transaction where
 
 import           Control.Concurrent.Async
 import           Control.Exception

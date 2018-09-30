@@ -2,7 +2,7 @@ module Earnest.Reactor.Tests where
 
 import           Control.Lens
 import           Control.Monad.State
-import           Earnest.Action
+import           Data.Earnest.Action
 import           Earnest.Reactor
 import qualified Streamly            as S
 import qualified Streamly.Prelude    as S

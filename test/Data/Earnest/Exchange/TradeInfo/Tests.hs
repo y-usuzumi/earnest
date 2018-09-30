@@ -1,8 +1,8 @@
-module Earnest.Exchange.TradeInfo.Tests where
+module Data.Earnest.Exchange.TradeInfo.Tests where
 
 import           Control.Monad.State
-import           Earnest.Currency
-import           Earnest.Exchange.TradeInfo
+import           Data.Earnest.Currency
+import           Data.Earnest.Exchange.TradeInfo
 import           Test.Tasty
 import           Test.Tasty.HUnit
 

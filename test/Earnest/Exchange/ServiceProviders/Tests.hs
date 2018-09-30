@@ -1,7 +1,7 @@
 module Earnest.Exchange.ServiceProviders.Tests where
 
 import           Control.Monad.State
-import           Earnest.Exchange
+import           Data.Earnest.Exchange
 import           Earnest.Exchange.ServiceProviders.AEX
 import           Earnest.Exchange.ServiceProviders.GateHub
 import           System.Environment
