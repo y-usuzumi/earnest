@@ -4,19 +4,24 @@ import           Control.Lens
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Control.Monad.State
-import           Data.Hashable
-import qualified Data.HashMap.Strict        as HM
-import qualified Data.Set                   as S
-import           Data.Typeable
 import           Data.Earnest.Currency
 import           Data.Earnest.Exchange.TradeInfo
 import           Data.Earnest.Transaction
+import           Data.Hashable
+import qualified Data.HashMap.Strict             as HM
+import qualified Data.Set                        as S
+import           Data.Typeable
+import           Text.Printf
 
-class (Ord e, Hashable e, Typeable e) => Exchange e where
+class (Hashable e, Ord e, Show e, Typeable e) => Exchange e where
   loadInfo :: MonadIO m => e -> m ExchangeInfo
 
 data HExchange where
   HExchange :: Exchange e => e -> HExchange
+
+instance Show HExchange where
+  -- FIXME: Should implement showsPrec for better bracketing and stuff
+  show (HExchange e) = printf "HExchange %s" (show e)
 
 instance Hashable HExchange where
   hashWithSalt a (HExchange e) = hashWithSalt a e

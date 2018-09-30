@@ -10,8 +10,8 @@ import           GHC.Generics
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-data Exchange1 = Exchange1 deriving (Eq, Generic, Ord)
-data Exchange2 = Exchange2 deriving (Eq, Generic, Ord)
+data Exchange1 = Exchange1 deriving (Eq, Generic, Ord, Show)
+data Exchange2 = Exchange2 deriving (Eq, Generic, Ord, Show)
 
 instance Hashable Exchange1
 instance Hashable Exchange2
@@ -47,6 +47,15 @@ testGraphFromExchanges = testCase "graphFromExchanges" $ do
   length (getTradableOptions XRP g) @?= 1
   length (getTradableOptions BTS g) @?= 0
 
+testExplain :: TestTree
+testExplain = testCase "explain" $ do
+  lxxi <- mapM (\h@(HExchange x) -> loadInfo x >>= \y -> return (h, y)) [ HExchange Exchange1
+                                                                        , HExchange Exchange2
+                                                                        ]
+  let g = graphFromExchanges lxxi
+  explain g
+
 tests :: TestTree
-tests = testGroup "EGaph" [ testGraphFromExchanges
-                          ]
+tests = testGroup "EGraph" [ testGraphFromExchanges
+                           , testExplain
+                           ]
