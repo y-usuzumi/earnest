@@ -61,6 +61,15 @@ getTradableOptions c (_, v2n, k2v) = case k2v (KCurrency c) of
     n2to (NCurrency _) = error "Malformed graph: currency nodes connect to each other"
     n2to (NExchange x i o ti) = (x, i, o, ti)
 
+stronglyConnectedEGraphs :: EGraph -> [EGraph]
+stronglyConnectedEGraphs (g, v2n, k2v) = let
+  vs = map v2n $ vertices g
+  in
+  map buildEGraph $ stronglyConnCompR vs
+  where
+    buildEGraph (AcyclicSCC v) = graphFromEdges [v]
+    buildEGraph (CyclicSCC vs) = graphFromEdges vs
+
 explain :: EGraph -> IO ()
 explain (g, v2n, k2v) = do
   let vs = map (view _1 . v2n) $ vertices g
@@ -73,3 +82,4 @@ explain (g, v2n, k2v) = do
   forM_ es $ \(start, end) -> do
     printf "%s -> %s" (show start) (show end)
     putStrLn ""
+
