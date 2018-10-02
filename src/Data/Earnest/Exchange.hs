@@ -20,8 +20,7 @@ data HExchange where
   HExchange :: Exchange e => e -> HExchange
 
 instance Show HExchange where
-  -- FIXME: Should implement showsPrec for better bracketing and stuff
-  show (HExchange e) = printf "HExchange %s" (show e)
+  showsPrec d (HExchange e) = showParen (d > 10) $ showString "HExchange " . showsPrec 11 e
 
 instance Hashable HExchange where
   hashWithSalt a (HExchange e) = hashWithSalt a e
