@@ -7,20 +7,20 @@ import           Control.Monad.Catch
 import           Control.Monad.Cont
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
-import           Data.Hashable                (Hashable)
-import qualified Data.HashMap.Strict          as HM
-import           Data.List
-import           Data.Maybe
-import           Data.Maybe
-import qualified Data.Text                    as T
-import qualified Data.Text.IO                 as TIO
 import           Data.Earnest.Currency
 import           Data.Earnest.Exchange
 import           Data.Earnest.Exchange.TradeInfo
+import           Data.Hashable                   (Hashable)
+import qualified Data.HashMap.Strict             as HM
+import           Data.List
+import           Data.Maybe
+import           Data.Maybe
+import qualified Data.Text                       as T
+import qualified Data.Text.IO                    as TIO
 import           Earnest.WebDriver.Utils
 import           GHC.Generics
 import           System.Environment
-import           Test.WebDriver               hiding (browser)
+import           Test.WebDriver                  hiding (browser)
 import           Test.WebDriver.Commands.Wait
 import           Text.Printf
 
@@ -52,6 +52,7 @@ data AEXExchange = AEXExchange { username :: String
 instance Hashable AEXExchange
 
 instance Exchange AEXExchange where
+  confidence _ = return 0.2
   loadInfo AEXExchange{..} = do
     currencyPairs <- liftIO $ runSession wdConfig . finallyClose $ do
       openPage $ aexPageList HM.! AEXLogin

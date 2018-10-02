@@ -36,6 +36,7 @@ data GateHubExchange = GateHubExchange { username :: String
 instance Hashable GateHubExchange
 
 instance Exchange GateHubExchange where
+  confidence _ = return 1
   loadInfo GateHubExchange{..} = do
     liftIO $ void $ runSession wdConfig . finallyClose $ do
       openPage "https://signin.gatehub.net/"

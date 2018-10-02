@@ -14,6 +14,8 @@ import           Data.Typeable
 import           Text.Printf
 
 class (Hashable e, Ord e, Show e, Typeable e) => Exchange e where
+  confidence :: MonadIO m => e -> m Double
+  confidence _ = return 1
   loadInfo :: MonadIO m => e -> m ExchangeInfo
 
 data HExchange where
