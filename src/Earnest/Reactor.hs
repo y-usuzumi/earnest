@@ -9,7 +9,7 @@ import           Data.Foldable
 import           Data.Earnest.Action
 import           Data.Earnest.Exchange
 import           Streamly               as S
-import qualified Streamly.Prelude       as SP
+import qualified Streamly.Prelude       as S
 
 data Reactor = Reactor { _exchanges :: [HExchange]
                        , _loop      :: Int
@@ -27,5 +27,6 @@ runReactor = do
   reactor <- lift $ get
   elems <- replicateM 5 $ do
     lift $ modify' (over loop (+1))
-    return $ Ron [DummyAction $ length $ reactor ^. exchanges]
-  SP.fromList elems
+    let xCnt = length $ reactor ^. exchanges
+    return $ Ron $ S.fromList [DummyAction xCnt]
+  S.fromList elems
