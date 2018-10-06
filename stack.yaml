@@ -39,7 +39,8 @@ packages:
 # using the same syntax as the packages field.
 # (e.g., acme-missiles-0.3)
 extra-deps:
-  - streamly-0.4.1
+- streamly-0.4.1
+- lens-4.17
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

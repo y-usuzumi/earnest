@@ -1,11 +1,12 @@
 module Earnest.Strategy where
 
+import           Control.Monad.Identity
+import           Control.Monad.IO.Class
 import           Data.Earnest.Action
 import           Data.Earnest.EGraph
-import           Streamly            as S
-import qualified Streamly.Prelude    as S
+import           Streamly               as S
+import qualified Streamly.Prelude       as S
 
-findRons :: (Monad m, IsStream s, Monad (s m)) => EGraph -> s m Ron
+findRons :: (IsStream s, Monad (s Identity)) => EGraph -> s Identity (Ron s Identity)
 findRons g = do
-  return Ron{ _actions = S.fromList []
-            }
+  return $ Ron $ serially $ (S.fromList [] :: SerialT Identity a)

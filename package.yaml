@@ -25,10 +25,10 @@ dependencies:
 - containers
 - exceptions
 - hashable
-- lens
+- lens >= 4.17
 - monad-control
 - mtl
-- streamly==0.4.1
+- streamly == 0.4.1
 - tasty
 - tasty-hunit
 - template-haskell
@@ -47,6 +47,7 @@ default-extensions:
 - GADTs
 - OverloadedStrings
 - QuasiQuotes
+- PartialTypeSignatures
 - RankNTypes
 - RecordWildCards
 - ScopedTypeVariables

@@ -22,11 +22,13 @@ runReactor :: ( IsStream s
               , MonadIO (s m)
               , Monad mio
               , m ~ StateT Reactor mio
-              ) => s (StateT Reactor mio) Ron
+              , IsStream s'
+              , Monad (s' Identity)
+              ) => s (StateT Reactor mio) (Ron s' Identity)
 runReactor = do
   reactor <- lift $ get
   elems <- replicateM 5 $ do
     lift $ modify' (over loop (+1))
     let xCnt = length $ reactor ^. exchanges
-    return $ Ron $ S.fromList [DummyAction xCnt]
-  S.fromList elems
+    return $ Ron $ serially $ (S.fromList [DummyAction xCnt] :: SerialT Identity Action)
+  serially $ S.fromList elems

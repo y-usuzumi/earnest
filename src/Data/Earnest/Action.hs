@@ -10,8 +10,8 @@ data Action where
   DummyAction :: Int -> Action
   Trade :: Exchange e => e -> Currency -> Currency -> Action
 
-data Ron where
-  Ron :: { _actions :: (Monad m, IsStream s, Monad (s m)) => s m Action } -> Ron
+data Ron s m where
+  Ron :: (IsStream s, Monad (s m)) => s m Action -> Ron s m
 
-makeLenses ''Action
-makeLenses ''Ron
+-- NOTE: There would be NO actions lens for these types because the 's'
+-- and 'm' type constructors would escape from the scope
