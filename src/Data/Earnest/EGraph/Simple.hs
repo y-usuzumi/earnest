@@ -1,4 +1,4 @@
-module Data.Earnest.EGraph where
+module Data.Earnest.EGraph.Simple where
 
 import           Control.Arrow
 import           Control.Lens
@@ -15,22 +15,22 @@ import           Data.Maybe
 import           GHC.Generics
 import           Text.Printf
 
-data Node = NCurrency Currency
+data ENode = NCurrency Currency
           | NExchange HExchange Currency Currency TradeInfo
           deriving (Eq, Generic, Show)
 
-instance Hashable Node
+instance Hashable ENode
 
-data Key = KCurrency Currency
+data EKey = KCurrency Currency
          | KExchange HExchange Currency Currency
          deriving (Eq, Ord, Show)
 
-type EGraph = (Graph, Vertex -> (Node, Key, [Key]), Key -> Maybe Vertex)
+type EGraph = (Graph, Vertex -> (ENode, EKey, [EKey]), EKey -> Maybe Vertex)
 
 graphFromExchanges :: [(HExchange, ExchangeInfo)] -> EGraph
 graphFromExchanges = graphFromEdges . toEdges
   where
-    toEdges :: [(HExchange, ExchangeInfo)] -> [(Node, Key, [Key])]
+    toEdges :: [(HExchange, ExchangeInfo)] -> [(ENode, EKey, [EKey])]
     toEdges = toNKKs . foldl' folder HM.empty
 
     folder hm (x, xi) =

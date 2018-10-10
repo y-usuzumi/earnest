@@ -24,6 +24,7 @@ dependencies:
 - base >= 4.7 && < 5
 - containers
 - exceptions
+- fgl == 5.6.0.0
 - hashable
 - lens >= 4.17
 - monad-control
