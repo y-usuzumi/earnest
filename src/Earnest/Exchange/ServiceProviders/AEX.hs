@@ -9,6 +9,7 @@ import           Control.Monad.State
 import           Control.Monad.Trans.Control
 import           Data.Earnest.Currency
 import           Data.Earnest.Exchange
+import           Data.Earnest.Exchange.Balance
 import           Data.Earnest.Exchange.TradeInfo
 import           Data.Hashable                   (Hashable)
 import qualified Data.HashMap.Strict             as HM
@@ -70,7 +71,8 @@ instance Exchange AEXExchange where
       return currencyPairs
       -- control $ \runInIO -> do
       --   runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ _supportedTrades = newTradeInfoLookup
+    return ExchangeInfo{ _supportedTrades = newTradeInfoTable
+                       , _balances = newBalanceTable  -- FIXME
                        }
 
     where
@@ -93,11 +95,11 @@ instance Exchange AEXExchange where
               lift $ liftIO $ putStrLn "Finding markets_link"
               maybeElemMarketLink <- lift $ maybeNotFound $ findElemFrom elemRow (ByClass "markets_link")
               when (isNothing maybeElemMarketLink) $ exit []
-              let (Just elemMarketLink) = maybeElemMarketLink
+              let elemMarketLink = fromJust maybeElemMarketLink
               liftIO $ putStrLn "Finding <li>'s'"
               maybeElemPairs <- lift $ maybeNotFound $ findElemsFrom elemMarketLink (ByTag "li")
               when (isNothing maybeElemPairs) $ exit []
-              let (Just elemPairs) = maybeElemPairs
+              let elemPairs = fromJust maybeElemPairs
               lift $ do
                 cleanedPairs <- forM elemPairs (
                   \elemPair -> fmap fromJust $ attr elemPair "innerText"

@@ -5,15 +5,16 @@ module Earnest.Exchange.ServiceProviders.GateHub
 import           Control.Concurrent
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
-import           Data.Hashable
-import           Data.List
-import qualified Data.Text                    as T
 import           Data.Earnest.Currency
 import           Data.Earnest.Exchange
+import           Data.Earnest.Exchange.Balance
 import           Data.Earnest.Exchange.TradeInfo
+import           Data.Hashable
+import           Data.List
+import qualified Data.Text                       as T
 import           GHC.Generics
 import           System.Environment
-import           Test.WebDriver               hiding (browser)
+import           Test.WebDriver                  hiding (browser)
 import           Test.WebDriver.Commands.Wait
 
 browser :: Browser
@@ -48,5 +49,6 @@ instance Exchange GateHubExchange where
       submit elemForm
       control $ \runInIO -> do
         runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ _supportedTrades = newTradeInfoLookup
+    return ExchangeInfo{ _supportedTrades = newTradeInfoTable
+                       , _balances = newBalanceTable  -- FIXME
                        }

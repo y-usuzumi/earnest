@@ -8,32 +8,32 @@ import           Data.List
 import           Data.Earnest.Currency
 import           GHC.Generics
 
-type TradeInfoLookup = HM.HashMap Currency (HM.HashMap Currency TradeInfo)
+type TradeInfoTable = HM.HashMap Currency (HM.HashMap Currency TradeInfo)
 
 data TradeInfo = TradeInfo { fee          :: Double
                            } deriving (Eq, Generic, Hashable, Show)
 
-newTradeInfoLookup :: TradeInfoLookup
-newTradeInfoLookup = HM.empty
+newTradeInfoTable :: TradeInfoTable
+newTradeInfoTable = HM.empty
 
-merge :: [(Currency, Currency, TradeInfo)] -> State TradeInfoLookup ()
+merge :: [(Currency, Currency, TradeInfo)] -> State TradeInfoTable ()
 merge pairs = do
   lookup <- get >>= return . flip (foldl' insertPair) pairs
   put lookup
   where
-    insertPair :: TradeInfoLookup -> (Currency, Currency, TradeInfo) -> TradeInfoLookup
+    insertPair :: TradeInfoTable -> (Currency, Currency, TradeInfo) -> TradeInfoTable
     insertPair lookup (cFrom, cTo, ti) =
       HM.insertWith mergeToCurrencyLookup cFrom (HM.singleton cTo ti) lookup
     mergeToCurrencyLookup = HM.unionWith (flip const)
 
-fromList :: [(Currency, Currency, TradeInfo)] -> TradeInfoLookup
-fromList pairs = execState (merge pairs) newTradeInfoLookup
+fromList :: [(Currency, Currency, TradeInfo)] -> TradeInfoTable
+fromList pairs = execState (merge pairs) newTradeInfoTable
 
-isSupported :: (Currency, Currency) -> TradeInfoLookup -> Bool
+isSupported :: (Currency, Currency) -> TradeInfoTable -> Bool
 isSupported (a, b) m
   | not (a `HM.member` m) = False
   | otherwise = let s = m HM.! a in b `HM.member` s
 
-toList :: TradeInfoLookup -> [(Currency, Currency, TradeInfo)]
+toList :: TradeInfoTable -> [(Currency, Currency, TradeInfo)]
 toList til = join $ map (\(k1, m) -> map (\(k2, ti) -> (k1, k2, ti)) $ HM.toList m) $
              HM.toList til

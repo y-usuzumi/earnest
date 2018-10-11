@@ -5,6 +5,7 @@ import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Control.Monad.State
 import           Data.Earnest.Currency
+import           Data.Earnest.Exchange.Balance
 import           Data.Earnest.Exchange.TradeInfo
 import           Data.Earnest.Transaction
 import           Data.Hashable
@@ -37,7 +38,8 @@ instance Ord HExchange where
     Just b' -> compare a b'
     Nothing -> compare (typeOf a) (typeOf b)
 
-data ExchangeInfo = ExchangeInfo { _supportedTrades :: TradeInfoLookup
+data ExchangeInfo = ExchangeInfo { _supportedTrades :: TradeInfoTable
+                                 , _balances        :: BalanceTable
                                  } deriving Show
 
 makeLenses ''ExchangeInfo

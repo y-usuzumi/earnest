@@ -56,6 +56,12 @@ default-extensions:
 - TemplateHaskell
 - TypeFamilies
 
+ghc-options:
+- -Werror
+- -fwarn-incomplete-uni-patterns
+- -fwarn-missing-methods
+- -fwarn-missing-fields
+
 library:
   source-dirs: src
 
