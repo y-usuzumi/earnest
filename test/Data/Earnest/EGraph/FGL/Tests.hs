@@ -12,10 +12,10 @@ import           Test.Tasty.HUnit
 
 testGraphFromBourses :: TestTree
 testGraphFromBourses = testCase "graphFromBourses" $ do
-  xxis <- $(xxisFromNames [ [|Bourse1|]
-                          , [|Bourse2|]
-                          ])
-  let g = graphFromBourses xxis
+  let bs = $(boursesFromNames [ [|Bourse1|]
+                              , [|Bourse2|]
+                              ])
+  g <- graphFromBourses bs
   assertBool "Should support CNY" $ isCurrencySupported CNY g
   assertBool "Should support XRP" $ isCurrencySupported XRP g
   assertBool "Should not support BTS" $ not $ isCurrencySupported BTS g
@@ -27,10 +27,10 @@ testGraphFromBourses = testCase "graphFromBourses" $ do
 
 testExplain :: TestTree
 testExplain = testCase "explain" $ do
-  xxis <- $(xxisFromNames [ [|Bourse1|]
-                          , [|Bourse2|]
-                          ])
-  let g = graphFromBourses xxis
+  let bs = $(boursesFromNames [ [|Bourse1|]
+                              , [|Bourse2|]
+                              ])
+  g <- graphFromBourses bs
   explain g
 
 tests :: TestTree

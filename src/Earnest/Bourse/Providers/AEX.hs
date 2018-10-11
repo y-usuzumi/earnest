@@ -48,7 +48,7 @@ aexPageList = HM.fromList
 
 data AEXBourse = AEXBourse { username :: String
                            , password :: String
-                           } deriving (Eq, Generic, Ord, Show)
+                           } deriving (Eq, Generic, Show)
 
 instance Hashable AEXBourse
 

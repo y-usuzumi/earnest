@@ -3,6 +3,7 @@ module Earnest.Bourse.Providers.Tests where
 import           Control.Monad.State
 import           Data.Earnest.Bourse
 import           Earnest.Bourse.Providers.AEX
+import           Earnest.Bourse.Providers.AEXAPI
 import           Earnest.Bourse.Providers.GateHub
 import           System.Environment
 import           Test.Tasty
@@ -21,8 +22,27 @@ initAEX = do
 testAEX :: TestTree
 testAEX = testCase "AEX" $ do
   aex <- initAEX
-  ei <- loadInfo aex
-  print ei
+  bi <- loadInfo aex
+  print bi
+  return ()
+
+-- AEXAPI
+
+initAEXAPI :: IO AEXAPIBourse
+initAEXAPI = do
+  uid <- liftIO $ getEnv "EARNEST_PROVIDER_AEXAPI_UID"
+  key <- liftIO $ getEnv "EARNEST_PROVIDER_AEXAPI_KEY"
+  skey <- liftIO $ getEnv "EARNEST_PROVIDER_AEXAPI_SKEY"
+  return AEXAPIBourse{ uid = uid
+                     , key = key
+                     , skey = skey
+                     }
+
+testAEXAPI :: TestTree
+testAEXAPI = testCase "AEXAPI" $ do
+  aexapi <- initAEXAPI
+  bi <- loadInfo aexapi
+  print bi
   return ()
 
 -- GateHub
@@ -38,9 +58,11 @@ initGateHubEnv = do
 testGateHub :: TestTree
 testGateHub = testCase "GateHub" $ do
   gateHub <- initGateHubEnv
-  ei <- loadInfo gateHub
+  bi <- loadInfo gateHub
   return ()
 
 tests :: TestTree
 tests = testGroup "Providers" [ testAEX
+                              , testAEXAPI
+                              , testGateHub
                               ]

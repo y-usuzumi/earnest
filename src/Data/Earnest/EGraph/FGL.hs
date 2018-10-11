@@ -3,6 +3,7 @@ module Data.Earnest.EGraph.FGL where
 import           Control.Arrow
 import           Control.Lens
 import           Control.Monad
+import           Control.Monad.IO.Class
 import           Data.Earnest.Bourse
 import           Data.Earnest.Currency
 import           Data.Earnest.ExchangeInfo
@@ -21,10 +22,12 @@ data EEdgeInfo = ETrade HBourse TradeInfo
                deriving Show
 type EGraph = Gr ENodeInfo EEdgeInfo
 
-graphFromBourses :: [(HBourse, BourseInfo)] -> EGraph
-graphFromBourses xxiPairs = let
-  xCCTIPairs = map (fst &&& toList . view supportedTrades . snd) xxiPairs
-  in mkGraph (join $ map mkNodes xCCTIPairs) (join $ map mkEdges xCCTIPairs)
+graphFromBourses :: MonadIO m => [HBourse] -> m EGraph
+graphFromBourses bourses = do
+  bis <- mapM (\(HBourse b) -> loadInfo b) bourses
+  let b_bi_pairs = zip bourses bis
+      b_c_c_ti_pairs = map (fst &&& toList . view supportedTrades . snd) b_bi_pairs
+  return $ mkGraph (join $ map mkNodes b_c_c_ti_pairs) (join $ map mkEdges b_c_c_ti_pairs)
   where
     mkNodes (x, cctis) = map ( fromEnum
                                &&&

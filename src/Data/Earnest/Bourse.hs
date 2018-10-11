@@ -14,7 +14,7 @@ import qualified Data.Set                 as S
 import           Data.Typeable
 import           Text.Printf
 
-class (Hashable e, Ord e, Show e, Typeable e) => Bourse e where
+class (Hashable e, Show e, Typeable e) => Bourse e where
   loadInfo :: MonadIO m => e -> m BourseInfo
 
 data HBourse where
@@ -25,16 +25,6 @@ instance Show HBourse where
 
 instance Hashable HBourse where
   hashWithSalt a (HBourse e) = hashWithSalt a e
-
-instance Eq HBourse where
-  HBourse a == HBourse b = case cast b of
-    Just b' -> a == b'
-    Nothing -> False
-
-instance Ord HBourse where
-  compare (HBourse a) (HBourse b) = case cast b of
-    Just b' -> compare a b'
-    Nothing -> compare (typeOf a) (typeOf b)
 
 data BourseInfo = BourseInfo { _supportedTrades :: TradeInfoTable
                              , _balances        :: BalanceTable

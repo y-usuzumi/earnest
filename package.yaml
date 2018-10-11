@@ -20,12 +20,15 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/githubuser/earnest#readme>
 
 dependencies:
+- aeson
 - async
 - base >= 4.7 && < 5
+- bytestring
 - containers
 - exceptions
 - fgl == 5.6.0.0
 - hashable
+- hashing
 - lens >= 4.17
 - monad-control
 - mtl
@@ -34,10 +37,12 @@ dependencies:
 - tasty-hunit
 - template-haskell
 - text
+- unix
 - unliftio-core
 - unliftio
 - unordered-containers
 - webdriver
+- wreq
 
 default-extensions:
 - DeriveAnyClass
@@ -54,6 +59,7 @@ default-extensions:
 - ScopedTypeVariables
 - StandaloneDeriving
 - TemplateHaskell
+- TupleSections
 - TypeFamilies
 
 ghc-options:
