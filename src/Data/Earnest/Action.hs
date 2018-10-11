@@ -2,13 +2,13 @@ module Data.Earnest.Action where
 
 import           Control.Lens
 import           Data.Earnest.Currency
-import           Data.Earnest.Exchange
+import           Data.Earnest.Bourse
 import           Streamly
 
 
 data Action where
   DummyAction :: Int -> Action
-  Trade :: Exchange e => e -> Currency -> Currency -> Action
+  Trade :: HBourse -> Currency -> Currency -> Action
 
 data Ron s m where
   Ron :: (IsStream s, Monad (s m)) => s m Action -> Ron s m

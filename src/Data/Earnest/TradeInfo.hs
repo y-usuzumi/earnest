@@ -1,4 +1,4 @@
-module Data.Earnest.Exchange.TradeInfo where
+module Data.Earnest.TradeInfo where
 
 import           Control.Monad.State
 import           Data.Hashable

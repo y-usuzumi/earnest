@@ -1,20 +1,20 @@
-module Earnest.Exchange.ServiceProviders.GateHub
-  ( GateHubExchange(..)
+module Earnest.Bourse.Providers.GateHub
+  ( GateHubBourse(..)
   ) where
 
 import           Control.Concurrent
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
+import           Data.Earnest.Balance
+import           Data.Earnest.Bourse
 import           Data.Earnest.Currency
-import           Data.Earnest.Exchange
-import           Data.Earnest.Exchange.Balance
-import           Data.Earnest.Exchange.TradeInfo
+import           Data.Earnest.TradeInfo
 import           Data.Hashable
 import           Data.List
-import qualified Data.Text                       as T
+import qualified Data.Text                    as T
 import           GHC.Generics
 import           System.Environment
-import           Test.WebDriver                  hiding (browser)
+import           Test.WebDriver               hiding (browser)
 import           Test.WebDriver.Commands.Wait
 
 browser :: Browser
@@ -30,15 +30,14 @@ wdConfig = foldl' (flip ($)) defaultConfig
   --                     }
   ]
 
-data GateHubExchange = GateHubExchange { username :: String
-                                       , password :: String
-                                       } deriving (Eq, Generic, Ord, Show)
+data GateHubBourse = GateHubBourse { username :: String
+                                   , password :: String
+                                   } deriving (Eq, Generic, Ord, Show)
 
-instance Hashable GateHubExchange
+instance Hashable GateHubBourse
 
-instance Exchange GateHubExchange where
-  confidence _ = return 1
-  loadInfo GateHubExchange{..} = do
+instance Bourse GateHubBourse where
+  loadInfo GateHubBourse{..} = do
     liftIO $ void $ runSession wdConfig . finallyClose $ do
       openPage "https://signin.gatehub.net/"
       elemUsername <- findElem $ ByName "gatehub_name"
@@ -49,6 +48,7 @@ instance Exchange GateHubExchange where
       submit elemForm
       control $ \runInIO -> do
         runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ _supportedTrades = newTradeInfoTable
-                       , _balances = newBalanceTable  -- FIXME
-                       }
+    return BourseInfo{ _supportedTrades = newTradeInfoTable
+                     , _balances = newBalanceTable  -- FIXME
+                     , _confidence = 1.0
+                     }

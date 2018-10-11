@@ -10,12 +10,12 @@ import           GHC.Generics
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-testGraphFromExchanges :: TestTree
-testGraphFromExchanges = testCase "graphFromExchanges" $ do
-  xxis <- $(xxisFromNames [ [|Exchange1|]
-                          , [|Exchange2|]
+testGraphFromBourses :: TestTree
+testGraphFromBourses = testCase "graphFromBourses" $ do
+  xxis <- $(xxisFromNames [ [|Bourse1|]
+                          , [|Bourse2|]
                           ])
-  let g = graphFromExchanges xxis
+  let g = graphFromBourses xxis
   assertBool "Should support CNY" $ isCurrencySupported CNY g
   assertBool "Should support XRP" $ isCurrencySupported XRP g
   assertBool "Should not support BTS" $ not $ isCurrencySupported BTS g
@@ -27,13 +27,13 @@ testGraphFromExchanges = testCase "graphFromExchanges" $ do
 
 testExplain :: TestTree
 testExplain = testCase "explain" $ do
-  xxis <- $(xxisFromNames [ [|Exchange1|]
-                          , [|Exchange2|]
+  xxis <- $(xxisFromNames [ [|Bourse1|]
+                          , [|Bourse2|]
                           ])
-  let g = graphFromExchanges xxis
+  let g = graphFromBourses xxis
   explain g
 
 tests :: TestTree
-tests = testGroup "FGL" [ testGraphFromExchanges
+tests = testGroup "FGL" [ testGraphFromBourses
                         , testExplain
                         ]

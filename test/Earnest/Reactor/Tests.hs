@@ -14,7 +14,7 @@ testReactor = testCase "reactor" $ do
   let zeroReactor = Reactor { _exchanges = []
                             , _loop = 0
                             }
-  s <- execStateT (S.runStream (runReactor :: SerialT _ (Ron SerialT _))) zeroReactor
+  s <- execStateT (S.runStream (runReactor :: SerialT (StateT Reactor IO) (Ron SerialT Identity))) zeroReactor
   (s ^. loop) @?= 5
   rons <- evalStateT (S.toList $ S.serially runReactor) zeroReactor
   let actionCount = length $ join $ map (\(Ron action) -> return $ S.toList action) rons

@@ -1,5 +1,5 @@
-module Earnest.Exchange.ServiceProviders.AEX
-  ( AEXExchange(..)
+module Earnest.Bourse.Providers.AEX
+  ( AEXBourse(..)
   ) where
 
 import           Control.Concurrent
@@ -8,9 +8,9 @@ import           Control.Monad.Cont
 import           Control.Monad.State
 import           Control.Monad.Trans.Control
 import           Data.Earnest.Currency
-import           Data.Earnest.Exchange
-import           Data.Earnest.Exchange.Balance
-import           Data.Earnest.Exchange.TradeInfo
+import           Data.Earnest.Bourse
+import           Data.Earnest.Balance
+import           Data.Earnest.TradeInfo
 import           Data.Hashable                   (Hashable)
 import qualified Data.HashMap.Strict             as HM
 import           Data.List
@@ -46,15 +46,14 @@ aexPageList = HM.fromList
   , (AEXPersonalCenter, "https://www.aex.com/page/person_center.html")
   ]
 
-data AEXExchange = AEXExchange { username :: String
-                               , password :: String
-                               } deriving (Eq, Generic, Ord, Show)
+data AEXBourse = AEXBourse { username :: String
+                           , password :: String
+                           } deriving (Eq, Generic, Ord, Show)
 
-instance Hashable AEXExchange
+instance Hashable AEXBourse
 
-instance Exchange AEXExchange where
-  confidence _ = return 0.2
-  loadInfo AEXExchange{..} = do
+instance Bourse AEXBourse where
+  loadInfo AEXBourse{..} = do
     currencyPairs <- liftIO $ runSession wdConfig . finallyClose $ do
       openPage $ aexPageList HM.! AEXLogin
       elemUsername <- findElem $ ById "my_self_email"
@@ -71,9 +70,10 @@ instance Exchange AEXExchange where
       return currencyPairs
       -- control $ \runInIO -> do
       --   runInIO $ liftIO $ threadDelay 20000000
-    return ExchangeInfo{ _supportedTrades = newTradeInfoTable
-                       , _balances = newBalanceTable  -- FIXME
-                       }
+    return BourseInfo{ _supportedTrades = newTradeInfoTable
+                     , _balances = newBalanceTable  -- FIXME
+                     , _confidence = 0.2
+                     }
 
     where
       getCurrencyPairs :: WD [(Currency, Currency)]

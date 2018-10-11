@@ -7,11 +7,11 @@ import           Control.Monad.IO.Class
 import           Control.Monad.State
 import           Data.Foldable
 import           Data.Earnest.Action
-import           Data.Earnest.Exchange
+import           Data.Earnest.Bourse
 import           Streamly               as S
 import qualified Streamly.Prelude       as S
 
-data Reactor = Reactor { _exchanges :: [HExchange]
+data Reactor = Reactor { _exchanges :: [HBourse]
                        , _loop      :: Int
                        }
 

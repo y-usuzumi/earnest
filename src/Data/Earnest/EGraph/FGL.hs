@@ -3,33 +3,46 @@ module Data.Earnest.EGraph.FGL where
 import           Control.Arrow
 import           Control.Lens
 import           Control.Monad
+import           Data.Earnest.Bourse
 import           Data.Earnest.Currency
-import           Data.Earnest.Exchange
-import           Data.Earnest.Exchange.TradeInfo
+import           Data.Earnest.ExchangeInfo
+import           Data.Earnest.TradeInfo
+import           Data.Earnest.TransferInfo
+import           Data.Earnest.Wallet       hiding (Currency)
 import           Data.Graph.Inductive
 import           Data.List
 
-data ENode = ECurrency Currency deriving Show
-data EEdge = EExchange HExchange TradeInfo deriving Show
-type EGraph = Gr ENode EEdge
+data ENodeInfo = ENodeInfo { _currency :: Currency
+                           , _exchange :: HBourse
+                           } deriving Show
+data EEdgeInfo = ETrade HBourse TradeInfo
+               | ETransfer HWallet TransferInfo  -- TODO: Verify this
+               | EExchange HBourse ExchangeInfo
+               deriving Show
+type EGraph = Gr ENodeInfo EEdgeInfo
 
-graphFromExchanges :: [(HExchange, ExchangeInfo)] -> EGraph
-graphFromExchanges xxiPairs = let
+graphFromBourses :: [(HBourse, BourseInfo)] -> EGraph
+graphFromBourses xxiPairs = let
   xCCTIPairs = map (fst &&& toList . view supportedTrades . snd) xxiPairs
-  in mkGraph (join $ map (mkNodes . snd) xCCTIPairs) (join $ map mkEdges xCCTIPairs)
+  in mkGraph (join $ map mkNodes xCCTIPairs) (join $ map mkEdges xCCTIPairs)
   where
-    mkNodes cctis = map (fromEnum &&& ECurrency) $ foldl' folder [] cctis
-    mkEdges (x, cctis) = map mkEdge (zip (repeat x) cctis)
-    mkEdge (x, (f, t, ti)) = (fromEnum f, fromEnum t, EExchange x ti)
+    mkNodes (x, cctis) = map ( fromEnum
+                               &&&
+                               \curr -> ENodeInfo{ _currency = curr
+                                                 , _exchange = x
+                                                 }
+                             ) $ foldl' folder [] cctis
+    mkEdges (x, cctis) = map mkEdge $ zip (repeat x) cctis
+    mkEdge (x, (f, t, ti)) = (fromEnum f, fromEnum t, ETrade x ti)
     folder l (f, t, ti) = f:t:l
 
 isCurrencySupported :: Currency -> EGraph -> Bool
 isCurrencySupported c g = gelem (fromEnum c) g
 
-getTradableOptions :: Currency -> EGraph -> [(HExchange, Currency, Currency, TradeInfo)]
+getTradableOptions :: Currency -> EGraph -> [(HBourse, Currency, Currency, TradeInfo)]
 getTradableOptions c g = map (r c) $ lsuc g (fromEnum c)
   where
-    r c (n, (EExchange x ti)) = (x, c, toEnum n, ti)
+    r c (n, (ETrade x ti)) = (x, c, toEnum n, ti)
 
 explain :: EGraph -> IO ()
 explain = prettyPrint

@@ -1,14 +1,14 @@
-module Data.Earnest.Exchange.TradeInfo.Tests where
+module Data.Earnest.TradeInfo.Tests where
 
 import           Control.Monad.State
 import           Data.Earnest.Currency
-import           Data.Earnest.Exchange.TradeInfo
+import           Data.Earnest.TradeInfo
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
 testSupports :: TestTree
 testSupports = testCase "isSupported" $ do
-  let newLookup = flip execState newTradeInfoLookup $ do
+  let newLookup = flip execState newTradeInfoTable $ do
         merge [ (CNY, XRP, undefined)
               , (CNY, BTC, undefined)
               , (BTC, XRP, undefined)
