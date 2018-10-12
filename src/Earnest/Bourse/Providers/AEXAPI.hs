@@ -32,6 +32,40 @@ apis = HM.fromList $ map (second prefixify)
 postOptions :: Options
 postOptions = defaults & header "User-Agent" .~ ["Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"]
 
+data APIFailure = APIFailure Int     -- ^ status code
+                             String  -- ^ message
+
+data APISuccess a = APISuccess Int   -- ^ status code
+                               a     -- ^ data
+
+type APIResult a = Either APIFailure (APISuccess a)
+
+getArgs :: MonadIO m => AEXAPIBourse -> m [FormParam]
+getArgs AEXAPIBourse{..} = do
+  now <- liftIO epochTime
+  let md5 = hash $ SBS.pack ( key ++ "_"
+                              ++ uid ++ "_"
+                              ++ skey ++ "_"
+                              ++ show now
+                            ) :: MD5
+      params =  [ "key" := key
+                , "time" := show now
+                , "md5" := show md5
+                ]
+  liftIO $ print params
+  return params
+
+tradingQuote :: AEXAPIBourse -> IO (APIResult (HM.HashMap String String))
+tradingQuote b = do
+  args <- getArgs b
+  r <- postWith postOptions (apis HM.! "balance") args
+  let t = r ^. responseBody
+      s = r ^. responseStatus . statusCode
+      respJson = decode t :: Maybe (HM.HashMap String String)
+  return $ case respJson of
+    Nothing -> Left (APIFailure s (LBS.unpack t))
+    Just json -> Right (APISuccess s json)
+
 data AEXAPIBourse = AEXAPIBourse { uid  :: String
                                  , key  :: String
                                  , skey :: String
@@ -41,32 +75,15 @@ instance Hashable AEXAPIBourse
 
 instance Bourse AEXAPIBourse where
   loadInfo b = do
-    args <- liftIO $ getArgs b
-    r <- liftIO $ postWith postOptions (apis HM.! "balance") args
-    let responseText = r ^. responseBody
-    let respJson = decode responseText :: Maybe (HM.HashMap String String)
-    liftIO $ print respJson
-    when (isNothing respJson) $ liftIO $ throwM (LoadInfoFailed $ LBS.unpack responseText)
-    let balances = toBalances $ fromJust respJson
-    liftIO $ print balances
+    tqResult <- liftIO $ tradingQuote b
+    balances <- case tqResult of
+      Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
+      Right (APISuccess _ d) -> return $ toBalances d
     return BourseInfo{ _supportedTrades = newTradeInfoTable
                      , _balances = balances
                      , _confidence = 0.2
                      }
     where
-      getArgs AEXAPIBourse{..} = do
-        now <- epochTime
-        let md5 = hash $ SBS.pack ( key ++ "_"
-                                   ++ uid ++ "_"
-                                   ++ skey ++ "_"
-                                   ++ show now
-                                 ) :: MD5
-        let params =  [ "key" := key
-                      , "time" := show now
-                      , "md5" := show md5
-                      ]
-        liftIO $ print params
-        return params
       keyCurrMap = HM.fromList $ map (first (++ "_balance")) [ ("ae", AE)
                                                              , ("ardr", ARDR)
                                                              , ("atn", ATN)

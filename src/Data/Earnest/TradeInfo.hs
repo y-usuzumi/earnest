@@ -18,7 +18,7 @@ newTradeInfoTable = HM.empty
 
 merge :: [(Currency, Currency, TradeInfo)] -> State TradeInfoTable ()
 merge pairs = do
-  lookup <- get >>= return . flip (foldl' insertPair) pairs
+  lookup <- gets $ flip (foldl' insertPair) pairs
   put lookup
   where
     insertPair :: TradeInfoTable -> (Currency, Currency, TradeInfo) -> TradeInfoTable
