@@ -10,6 +10,7 @@ import           Data.Aeson                 (decode)
 import qualified Data.ByteString.Char8      as SBS
 import qualified Data.ByteString.Lazy.Char8 as LBS
 import           Data.Earnest.Bourse
+import           Data.Earnest.Currency
 import           Data.Earnest.TradeInfo
 import           Data.Hashable              (Hashable)
 import qualified Data.HashMap.Strict        as HM
@@ -47,8 +48,9 @@ instance Bourse AEXAPIBourse where
     liftIO $ print respJson
     when (isNothing respJson) $ liftIO $ throwM (LoadInfoFailed $ LBS.unpack responseText)
     let balances = toBalances $ fromJust respJson
+    liftIO $ print balances
     return BourseInfo{ _supportedTrades = newTradeInfoTable
-                     , _balances = undefined
+                     , _balances = balances
                      , _confidence = 0.2
                      }
     where
@@ -65,4 +67,17 @@ instance Bourse AEXAPIBourse where
                       ]
         liftIO $ print params
         return params
-      toBalances map = HM.empty
+      keyCurrMap = HM.fromList [ ("bcc_balance", BCC)
+                               , ("bitcny_balance", BitCNY)
+                               , ("cnc_balance", CNC)
+                               , ("tac_balance", TAC)
+                               , ("fgc_balance", FGC)
+                               , ("bash_balance", BASH)
+                               , ("xrp_balance", XRP)
+                               , ("nss_balance", NSS)
+                               , ("tmc_balance", TMC)
+                               ]
+      toBalances map = HM.foldlWithKey' folder HM.empty map
+      folder newMap k v = case HM.lookup k keyCurrMap of
+        Nothing   -> newMap
+        Just curr -> HM.insert curr (read v :: Double) newMap

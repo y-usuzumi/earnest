@@ -49,6 +49,7 @@ data Currency = AE
               | MEC
               | MGC
               | NCS
+              | NSS
               | NULX
               | NXT
               | IGNIS
@@ -64,6 +65,7 @@ data Currency = AE
               | SNT
               | STB
               | SYS
+              | TAC
               | TAG
               | TMC
               | TYT
