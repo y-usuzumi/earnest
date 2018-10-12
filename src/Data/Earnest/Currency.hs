@@ -11,12 +11,15 @@ data Currency = AE
               | BCD
               | BCV
               | BCX
+              | BEC
               | BITE
               | BitCNY
               | BKBT
               | BLK
               | BNT
+              | BOST
               | BTC
+              | BTSV
               | BTM
               | BTS
               | CAN
@@ -27,14 +30,17 @@ data Currency = AE
               | CVC
               | DASH
               | DAT
+              | DGC
               | DOGE
               | EAC
               | ELA
+              | EMC
               | EOS
               | EOSDAC
               | ETC
               | ETH
               | FGC
+              | GAT
               | GNX
               | GOD
               | HLB
@@ -49,16 +55,19 @@ data Currency = AE
               | MEC
               | MGC
               | NCS
+              | NEO
               | NSS
-              | NULX
+              | NULS
               | NXT
               | IGNIS
               | JRC
               | OCT
               | OMG
               | OPC
+              | PPC
               | QASH
               | QRK
+              | RIC
               | SAC
               | SBTC
               | SEER
@@ -74,6 +83,7 @@ data Currency = AE
               | USDT  -- specific to AEX
               | VASH
               | VNS
+              | WDC
               | WIC
               | XAS
               | XCN
@@ -83,6 +93,7 @@ data Currency = AE
               | XRP
               | XYT
               | XZC
+              | YBC
               | YOYO
               | ZCC
               deriving (Enum, Eq, Generic, Ord, Read, Show)
