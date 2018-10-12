@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+import abc
+import argparse
+import os
+import sys
+
+_SELENIUM_PATH = "/usr/share/selenium-server/selenium-server-standalone.jar"
+
+
+def parse_args():
+    parser = argparse.ArgumentParser("earnest-launcher", "you guess", "The stupid Earnest launcher")
+    subparsers = parser.add_subparsers(help='sub-command help')
+
+    # install
+    install_parser = subparsers.add_parser("install", help="install earnest to ~/.local/bin")
+    install_parser.set_defaults(which='install')
+
+    # test
+    test_parser = subparsers.add_parser("test", help="run stack test")
+    test_parser.set_defaults(which='test')
+    test_parser.add_argument("-l", "--list", dest="list", action="store_true", default=False)
+    test_parser.add_argument("-p", "--pattern", dest="pattern")
+
+    repl_parser = subparsers.add_parser("repl", help="run stack repl")
+    repl_parser.set_defaults(which='repl')
+
+    selenium_parser = subparsers.add_parser("selenium", help="run selenium webdriver")
+    selenium_parser.set_defaults(which='selenium')
+
+    return parser.parse_args()
+
+
+class Command(metaclass=abc.ABCMeta):
+    def __init__(self, args):
+        self._args = args
+
+    @abc.abstractmethod
+    def run(self):
+        pass
+
+
+class InstallCommand(Command):
+    def run(self):
+        os.system("stack install")
+
+
+class TestCommand(Command):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        ta_args = []
+
+        if self._args.pattern is not None:
+            ta_args.append("-p %s" % self._args.pattern)
+        elif self._args.list:
+            ta_args.append("-l")
+        if ta_args:
+            self._cmd = "stack test --ta '%s'" % ' '.join(ta_args)
+        else:
+            self._cmd = "stack test"
+
+    def run(self):
+        os.system(self._cmd)
+
+
+class ReplCommand(Command):
+    def run(self):
+        os.system("stack repl")
+
+
+class SeleniumCommand(Command):
+    def run(self):
+        os.system("java -jar %s" % _SELENIUM_PATH)
+
+
+_cmd_mapper = {
+    "install": InstallCommand,
+    "test": TestCommand,
+    "repl": ReplCommand,
+    "selenium": SeleniumCommand
+}
+
+
+def run_command(ns, args):
+    return _cmd_mapper[ns](args).run()
+
+if __name__ == '__main__':
+    args = parse_args()
+    if not hasattr(args, 'which'):
+        print("Please provider a command (use '--help' for options)", file=sys.stderr)
+        exit(1)
+    ns = args.which
+    run_command(ns, args)
