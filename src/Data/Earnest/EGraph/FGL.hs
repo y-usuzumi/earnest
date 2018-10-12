@@ -16,6 +16,9 @@ import           Data.List
 data ENodeInfo = ENodeInfo { _currency :: Currency
                            , _exchange :: HBourse
                            } deriving Show
+
+makeLenses ''ENodeInfo
+
 data EEdgeInfo = ETrade HBourse TradeInfo
                | ETransfer HWallet TransferInfo  -- TODO: Verify this
                | EExchange HBourse ExchangeInfo
@@ -35,17 +38,17 @@ graphFromBourses bourses = do
                                                  , _exchange = x
                                                  }
                              ) $ foldl' folder [] cctis
-    mkEdges (x, cctis) = map mkEdge $ zip (repeat x) cctis
+    mkEdges (x, cctis) = map (curry mkEdge x) cctis
     mkEdge (x, (f, t, ti)) = (fromEnum f, fromEnum t, ETrade x ti)
     folder l (f, t, ti) = f:t:l
 
 isCurrencySupported :: Currency -> EGraph -> Bool
-isCurrencySupported c g = gelem (fromEnum c) g
+isCurrencySupported c = gelem (fromEnum c)
 
 getTradableOptions :: Currency -> EGraph -> [(HBourse, Currency, Currency, TradeInfo)]
 getTradableOptions c g = map (r c) $ lsuc g (fromEnum c)
   where
-    r c (n, (ETrade x ti)) = (x, c, toEnum n, ti)
+    r c (n, ETrade x ti) = (x, c, toEnum n, ti)
 
 explain :: EGraph -> IO ()
 explain = prettyPrint
