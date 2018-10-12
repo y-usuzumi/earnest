@@ -2,14 +2,18 @@ module Earnest.Bourse.Providers.AEXAPI where
 
 import           Control.Arrow
 import           Control.Lens
+import           Control.Monad
+import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Crypto.Hash
-import           Data.Aeson             (decode)
-import qualified Data.ByteString.Char8  as BS
+import           Data.Aeson                 (decode)
+import qualified Data.ByteString.Char8      as SBS
+import qualified Data.ByteString.Lazy.Char8 as LBS
 import           Data.Earnest.Bourse
 import           Data.Earnest.TradeInfo
-import           Data.Hashable          (Hashable)
-import qualified Data.HashMap.Strict    as HM
+import           Data.Hashable              (Hashable)
+import qualified Data.HashMap.Strict        as HM
+import           Data.Maybe
 import           GHC.Generics
 import           Network.Wreq
 import           System.Posix.Time
@@ -24,6 +28,9 @@ apis = HM.fromList $ map (id *** prefixify)
   where
     prefixify = ("https://api.aex.com/" ++)
 
+postOptions :: Options
+postOptions = defaults & header "User-Agent" .~ ["Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"]
+
 data AEXAPIBourse = AEXAPIBourse { uid  :: String
                                  , key  :: String
                                  , skey :: String
@@ -34,8 +41,12 @@ instance Hashable AEXAPIBourse
 instance Bourse AEXAPIBourse where
   loadInfo b = do
     args <- liftIO $ getArgs b
-    r <- liftIO $ post (apis HM.! "balance") args
-    let balances = toBalances (decode $ r ^. responseBody :: Maybe (HM.HashMap String String))
+    r <- liftIO $ postWith postOptions (apis HM.! "balance") args
+    let responseText = r ^. responseBody
+    let respJson = (decode responseText :: Maybe (HM.HashMap String String))
+    liftIO $ print respJson
+    when (isNothing respJson) $ liftIO $ throwM (LoadInfoFailed $ LBS.unpack responseText)
+    let balances = toBalances $ fromJust respJson
     return BourseInfo{ _supportedTrades = newTradeInfoTable
                      , _balances = undefined
                      , _confidence = 0.2
@@ -43,13 +54,15 @@ instance Bourse AEXAPIBourse where
     where
       getArgs AEXAPIBourse{..} = do
         now <- epochTime
-        let md5 = hash $ BS.pack ( key ++ "_"
+        let md5 = hash $ SBS.pack ( key ++ "_"
                                    ++ uid ++ "_"
                                    ++ skey ++ "_"
                                    ++ show now
                                  ) :: MD5
-        return [ "key" := key
-               , "time" := show now
-               , "md5" := show md5
-               ]
-      toBalances map = undefined  -- TODO
+        let params =  [ "key" := key
+                      , "time" := show now
+                      , "md5" := show md5
+                      ]
+        liftIO $ print params
+        return params
+      toBalances map = HM.empty

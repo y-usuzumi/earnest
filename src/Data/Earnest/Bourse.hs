@@ -14,6 +14,11 @@ import qualified Data.Set                 as S
 import           Data.Typeable
 import           Text.Printf
 
+data BourseException = LoadInfoFailed String
+                     deriving Show
+
+instance Exception BourseException
+
 class (Hashable e, Show e, Typeable e) => Bourse e where
   loadInfo :: MonadIO m => e -> m BourseInfo
 
