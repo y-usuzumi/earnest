@@ -32,6 +32,7 @@ dependencies:
 - lens >= 4.17
 - monad-control
 - mtl
+- optparse-applicative
 - streamly == 0.4.1
 - tasty
 - tasty-hunit
@@ -43,6 +44,7 @@ dependencies:
 - unordered-containers
 - webdriver
 - wreq
+- yaml
 
 default-extensions:
 - DeriveAnyClass
@@ -51,6 +53,7 @@ default-extensions:
 - FlexibleContexts
 - FlexibleInstances
 - GADTs
+- LambdaCase
 - OverloadedStrings
 - QuasiQuotes
 - PartialTypeSignatures

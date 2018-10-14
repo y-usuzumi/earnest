@@ -1,7 +1,8 @@
 .stack-work/
 earnest.cabal
 *~
-.env
+.earnest-config.yaml
+.earnest-config.test.yaml
 
 # Emacs
 .#*

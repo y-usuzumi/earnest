@@ -15,7 +15,6 @@ import           Data.Hashable                   (Hashable)
 import qualified Data.HashMap.Strict             as HM
 import           Data.List
 import           Data.Maybe
-import           Data.Maybe
 import qualified Data.Text                       as T
 import qualified Data.Text.IO                    as TIO
 import           Earnest.WebDriver.Utils
