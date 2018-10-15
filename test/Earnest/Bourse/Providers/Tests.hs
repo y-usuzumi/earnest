@@ -10,23 +10,26 @@ import           Earnest.Bourse.Providers.AEX
 import           Earnest.Bourse.Providers.AEXAPI
 import           Earnest.Bourse.Providers.GateHub
 import           System.Environment
+import           Test.Earnest.Util
 import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Text.Printf
+import Earnest.Config
+import Test.Earnest.Env
 
 -- AEX
 
-initAEX :: IO AEXBourse
-initAEX = do
-  username <- liftIO $ getEnv "EARNEST_PROVIDER_AEX_USERNAME"
-  password <- liftIO $ getEnv "EARNEST_PROVIDER_AEX_PASSWORD"
+initAEX :: TestEnv -> IO AEXBourse
+initAEX env = do
+  let cfg = earnestConfig env
+  let AEXBourseConfig{..} = $(findBourseConfig 'cfg 'AEXBourseConfig)
   return AEXBourse{ username = username
                   , password = password
                   }
 
-testAEX :: TestTree
-testAEX = testCase "AEX" $ do
-  aex <- initAEX
+testAEX :: TestEnv -> TestTree
+testAEX env = testCase "AEX" $ do
+  aex <- initAEX env
   bi <- loadInfo aex
   print bi
   return ()
@@ -43,8 +46,8 @@ initAEXAPI = do
                      , skey = skey
                      }
 
-testAEXAPI :: TestTree
-testAEXAPI = testCase "AEXAPI" $ do
+testAEXAPI :: TestEnv -> TestTree
+testAEXAPI env = testCase "AEXAPI" $ do
   aexapi <- initAEXAPI
   bi <- loadInfo aexapi
   g <- graphFromBourses [HBourse aexapi]
@@ -54,22 +57,22 @@ testAEXAPI = testCase "AEXAPI" $ do
 
 -- GateHub
 
-initGateHubEnv :: IO GateHubBourse
-initGateHubEnv = do
+initGateHub :: IO GateHubBourse
+initGateHub = do
   username <- liftIO $ getEnv "EARNEST_PROVIDER_GATEHUB_USERNAME"
   password <- liftIO $ getEnv "EARNEST_PROVIDER_GATEHUB_PASSWORD"
   return GateHubBourse{ username = username
                       , password = password
                       }
 
-testGateHub :: TestTree
-testGateHub = testCase "GateHub" $ do
-  gateHub <- initGateHubEnv
+testGateHub :: TestEnv -> TestTree
+testGateHub env = testCase "GateHub" $ do
+  gateHub <- initGateHub
   bi <- loadInfo gateHub
   return ()
 
-tests :: TestTree
-tests = testGroup "Providers" [ testAEX
-                              , testAEXAPI
-                              , testGateHub
-                              ]
+tests :: TestEnv -> TestTree
+tests env = testGroup "Providers" [ testAEX env
+                                  , testAEXAPI env
+                                  , testGateHub env
+                                  ]

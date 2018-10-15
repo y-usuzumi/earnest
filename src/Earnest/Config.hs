@@ -1,4 +1,4 @@
-module Test.Earnest where
+module Earnest.Config where
 
 import           Data.Aeson.TH
 import           Data.IORef
@@ -19,17 +19,17 @@ data BourseConfig = AEXBourseConfig { username :: String
                   deriving (Generic, Show)
 
 deriveJSON defaultOptions{ sumEncoding = defaultTaggedObject{ tagFieldName = "type"
-                                                              }
-                           , constructorTagModifier = \case
-                               "AEXBourseConfig" -> "aex"
-                               "AEXAPIBourseConfig" -> "aexapi"
-                               "GateHubBourseConfig" -> "gatehub"
-                               a -> a
-                           } ''BourseConfig
+                                                            }
+                         , constructorTagModifier = \case
+                             "AEXBourseConfig" -> "aex"
+                             "AEXAPIBourseConfig" -> "aexapi"
+                             "GateHubBourseConfig" -> "gatehub"
+                             a -> a
+                         } ''BourseConfig
 
 
 data Config = Config { bourses :: [BourseConfig]
-                     } deriving (Generic, Show, ToJSON)
+                     } deriving (Generic, Show, FromJSON, ToJSON)
 
 config :: IORef Config
 config = unsafePerformIO $ newIORef undefined

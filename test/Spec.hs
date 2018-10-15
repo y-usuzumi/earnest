@@ -6,24 +6,24 @@ import           Data.Yaml                      hiding (Parser)
 import qualified Earnest.Bourse.Tests           as Bourse
 import qualified Earnest.Reactor.Tests          as Reactor
 import           Options.Applicative
-import           Test.Earnest
+import           Test.Earnest.Env
 import           Test.Tasty
 
-dataTests :: TestTree
-dataTests = testGroup "data modules" [ DBourse.tests
-                                     , DEGraph.tests
-                                     , Transaction.tests
-                                     ]
+dataTests :: TestEnv -> TestTree
+dataTests env = testGroup "data modules" [ DBourse.tests env
+                                         , DEGraph.tests env
+                                         , Transaction.tests env
+                                         ]
 
-earnestTests :: TestTree
-earnestTests = testGroup "earnest" [ Bourse.tests
-                                   , Reactor.tests
-                                   ]
+earnestTests :: TestEnv -> TestTree
+earnestTests env = testGroup "earnest" [ Bourse.tests env
+                                       , Reactor.tests env
+                                       ]
 
-tests :: TestTree
-tests = testGroup "all tests" [ dataTests
-                              , earnestTests
-                              ]
+tests :: TestEnv -> TestTree
+tests env = testGroup "all tests" [ dataTests env
+                                  , earnestTests env
+                                  ]
 
 data Args = Args { configFile :: String
                  }
@@ -36,22 +36,10 @@ argsParser = Args
 
 main :: IO ()
 main = do
-  args <- execParser opts
-  let cfg = Config {
-        bourses = [ AEXBourseConfig { username = "SDF"
-                                    , password = "GGG"
-                                    }
-                  , AEXAPIBourseConfig { uid = "UID"
-                                       , key = "KEY"
-                                       , skey = "SKEY"
-                                       }
-                  , GateHubBourseConfig { username = "X"
-                                        , password = "Y"
-                                        }
-                  ]
-        }
-  C8.putStrLn $ encode cfg
-  -- defaultMain tests
+  Args{..} <- execParser opts
+  eitherConfig <- decodeFileEither configFile
+  let Right cfg = eitherConfig
+  defaultMain $ tests $ TestEnv { earnestConfig = cfg }
   where
     opts = info (argsParser <**> helper)
       ( fullDesc

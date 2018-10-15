@@ -67,7 +67,7 @@ default-extensions:
 
 ghc-options:
 - -Werror
-- -fwarn-incomplete-uni-patterns
+# - -fwarn-incomplete-uni-patterns
 - -fwarn-missing-methods
 - -fwarn-missing-fields
 
