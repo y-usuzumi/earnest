@@ -47,7 +47,7 @@ class InstallCommand(Command):
 class TestCommand(Command):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        ta_args = []
+        ta_args = ["-c", ".earnest-config.test.yaml"]
 
         if self._args.pattern is not None:
             ta_args.append("-p %s" % self._args.pattern)

@@ -9,3 +9,13 @@ bourses:  # You can add multiple entries for each bourse type
 - type: gatehub
   username: <username>
   password: <password>
+
+engine:
+- type: neo4j
+  username: <username>
+  password: <password>
+  host: <host>
+
+# The in-memory FGL graph engine
+# engine:
+# - type: fgl

@@ -151,7 +151,6 @@ getParams AEXAPIBourse{..} = do
                 , "time" := show now
                 , "md5" := show md5
                 ]
-  liftIO $ print params
   return params
 
 accountBalance :: AEXAPIBourse -> IO (APIResult (HM.HashMap String String))
