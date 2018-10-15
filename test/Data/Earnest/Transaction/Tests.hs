@@ -7,11 +7,11 @@ import           Test.Earnest.Env
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-testCreateOrder :: TestEnv -> TestTree
-testCreateOrder env = testCase "createOrder" $
+testCreateOrder :: TestTree
+testCreateOrder = testCase "createOrder" $
   runTransaction $
     liftIO $ putStrLn "GG"
 
-tests :: TestEnv -> TestTree
-tests env = testGroup "Transaction" [ testCreateOrder env
-                                    ]
+tests :: TestTree
+tests = testGroup "Transaction" [ testCreateOrder
+                                ]

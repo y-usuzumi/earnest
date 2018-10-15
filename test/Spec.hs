@@ -2,46 +2,34 @@ import           Data.ByteString.Char8          as C8
 import qualified Data.Earnest.Bourse.Tests      as DBourse
 import qualified Data.Earnest.EGraph.Tests      as DEGraph
 import qualified Data.Earnest.Transaction.Tests as Transaction
+import           Data.Proxy
 import           Data.Yaml                      hiding (Parser)
 import qualified Earnest.Bourse.Tests           as Bourse
+import           Earnest.Config
 import qualified Earnest.Reactor.Tests          as Reactor
 import           Options.Applicative
 import           Test.Earnest.Env
 import           Test.Tasty
+import           Test.Tasty.Options
 
-dataTests :: TestEnv -> TestTree
-dataTests env = testGroup "data modules" [ DBourse.tests env
-                                         , DEGraph.tests env
-                                         , Transaction.tests env
-                                         ]
+dataTests :: TestTree
+dataTests = testGroup "data modules" [ DBourse.tests
+                                     , DEGraph.tests
+                                     , Transaction.tests
+                                     ]
 
-earnestTests :: TestEnv -> TestTree
-earnestTests env = testGroup "earnest" [ Bourse.tests env
-                                       , Reactor.tests env
-                                       ]
+earnestTests :: TestTree
+earnestTests = testGroup "earnest" [ Bourse.tests
+                                   , Reactor.tests
+                                   ]
 
-tests :: TestEnv -> TestTree
-tests env = testGroup "all tests" [ dataTests env
-                                  , earnestTests env
-                                  ]
-
-data Args = Args { configFile :: String
-                 }
-
-argsParser :: Parser Args
-argsParser = Args
-  <$> argument str ( metavar "CONFIGFILE"
-                   <> help "The config file for running tests (in YAML format)"
-                   )
+tests :: TestTree
+tests = testGroup "all tests" [ dataTests
+                              , earnestTests
+                              ]
 
 main :: IO ()
-main = do
-  Args{..} <- execParser opts
-  eitherConfig <- decodeFileEither configFile
-  let Right cfg = eitherConfig
-  defaultMain $ tests $ TestEnv { earnestConfig = cfg }
+main = defaultMainWithIngredients ingredients tests
   where
-    opts = info (argsParser <**> helper)
-      ( fullDesc
-     <> progDesc "Run tests"
-      )
+    ingredients = configFileIngredient:defaultIngredients
+    configFileIngredient = includingOptions [Option (Proxy :: Proxy TestEnv)]

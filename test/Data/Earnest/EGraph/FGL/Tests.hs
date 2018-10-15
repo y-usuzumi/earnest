@@ -11,8 +11,8 @@ import           Test.Earnest.Env
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-testGraphFromBourses :: TestEnv -> TestTree
-testGraphFromBourses env = testCase "graphFromBourses" $ do
+testGraphFromBourses :: TestTree
+testGraphFromBourses = testCase "graphFromBourses" $ do
   let bs = $(boursesFromNames [ [|Bourse1|]
                               , [|Bourse2|]
                               ])
@@ -26,15 +26,15 @@ testGraphFromBourses env = testCase "graphFromBourses" $ do
   length (getTradableOptions XRP g) @?= 1
   length (getTradableOptions BTS g) @?= 0
 
-testExplain :: TestEnv -> TestTree
-testExplain env = testCase "explain" $ do
+testExplain :: TestTree
+testExplain = testCase "explain" $ do
   let bs = $(boursesFromNames [ [|Bourse1|]
                               , [|Bourse2|]
                               ])
   g <- graphFromBourses bs
   explain g
 
-tests :: TestEnv -> TestTree
-tests env = testGroup "FGL" [ testGraphFromBourses env
-                            , testExplain env
-                            ]
+tests :: TestTree
+tests = testGroup "FGL" [ testGraphFromBourses
+                        , testExplain
+                        ]

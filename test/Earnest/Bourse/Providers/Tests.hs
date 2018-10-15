@@ -9,70 +9,68 @@ import           Data.Maybe
 import           Earnest.Bourse.Providers.AEX
 import           Earnest.Bourse.Providers.AEXAPI
 import           Earnest.Bourse.Providers.GateHub
+import           Earnest.Config
 import           System.Environment
-import           Test.Earnest.Util
+import           Test.Earnest.Env
+import           Test.Earnest.Utils.TH
 import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Text.Printf
-import Earnest.Config
-import Test.Earnest.Env
+
 
 -- AEX
 
-initAEX :: TestEnv -> IO AEXBourse
-initAEX env = do
-  let cfg = earnestConfig env
+initAEX :: Config -> IO AEXBourse
+initAEX cfg = do
   let AEXBourseConfig{..} = $(findBourseConfig 'cfg 'AEXBourseConfig)
   return AEXBourse{ username = username
                   , password = password
                   }
 
-testAEX :: TestEnv -> TestTree
-testAEX env = testCase "AEX" $ do
-  aex <- initAEX env
+testAEX :: TestTree
+testAEX = askOption $ \env -> testCase "AEX" $ do
+  let cfg = earnestConfig env
+  aex <- initAEX cfg
   bi <- loadInfo aex
   print bi
-  return ()
 
 -- AEXAPI
 
-initAEXAPI :: IO AEXAPIBourse
-initAEXAPI = do
-  uid <- liftIO $ getEnv "EARNEST_PROVIDER_AEXAPI_UID"
-  key <- liftIO $ getEnv "EARNEST_PROVIDER_AEXAPI_KEY"
-  skey <- liftIO $ getEnv "EARNEST_PROVIDER_AEXAPI_SKEY"
+initAEXAPI :: Config -> IO AEXAPIBourse
+initAEXAPI cfg = do
+  let AEXAPIBourseConfig{..} = $(findBourseConfig 'cfg 'AEXAPIBourseConfig)
   return AEXAPIBourse{ uid = uid
                      , key = key
                      , skey = skey
                      }
 
-testAEXAPI :: TestEnv -> TestTree
-testAEXAPI env = testCase "AEXAPI" $ do
-  aexapi <- initAEXAPI
+testAEXAPI :: TestTree
+testAEXAPI = askOption $ \env -> testCase "AEXAPI" $ do
+  let cfg = earnestConfig env
+  aexapi <- initAEXAPI cfg
   bi <- loadInfo aexapi
   g <- graphFromBourses [HBourse aexapi]
-  forM_ (labEdges g) $ \(n1, n2, ei) -> do
+  forM_ (labEdges g) $ \(n1, n2, ei) ->
     printf "%s -> %s\n" (show $ fromJust (lab g n1) ^. currency) (show $ fromJust (lab g n2) ^. currency)
-  return ()
 
 -- GateHub
 
-initGateHub :: IO GateHubBourse
-initGateHub = do
-  username <- liftIO $ getEnv "EARNEST_PROVIDER_GATEHUB_USERNAME"
-  password <- liftIO $ getEnv "EARNEST_PROVIDER_GATEHUB_PASSWORD"
+initGateHub :: Config -> IO GateHubBourse
+initGateHub cfg = do
+  let GateHubBourseConfig{..} = $(findBourseConfig 'cfg 'GateHubBourseConfig)
   return GateHubBourse{ username = username
                       , password = password
                       }
 
-testGateHub :: TestEnv -> TestTree
-testGateHub env = testCase "GateHub" $ do
-  gateHub <- initGateHub
+testGateHub :: TestTree
+testGateHub = askOption $ \env -> testCase "GateHub" $ do
+  let cfg = earnestConfig env
+  gateHub <- initGateHub cfg
   bi <- loadInfo gateHub
   return ()
 
-tests :: TestEnv -> TestTree
-tests env = testGroup "Providers" [ testAEX env
-                                  , testAEXAPI env
-                                  , testGateHub env
-                                  ]
+tests :: TestTree
+tests = testGroup "Providers" [ testAEX
+                              , testAEXAPI
+                              , testGateHub
+                              ]

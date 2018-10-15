@@ -10,8 +10,8 @@ import           Test.Earnest.Env
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-testReactor :: TestEnv -> TestTree
-testReactor env = testCase "reactor" $ do
+testReactor :: TestTree
+testReactor = testCase "reactor" $ do
   let zeroReactor = Reactor { _exchanges = []
                             , _loop = 0
                             }
@@ -21,6 +21,6 @@ testReactor env = testCase "reactor" $ do
   let actionCount = length $ join $ map (\(Ron action) -> return $ S.toList action) rons
   actionCount @?= 5
 
-tests :: TestEnv -> TestTree
-tests env = testGroup "Transaction" [ testReactor env
-                                    ]
+tests :: TestTree
+tests = testGroup "Transaction" [ testReactor
+                                ]
