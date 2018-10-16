@@ -3,6 +3,7 @@ module Data.Earnest.EGraph.FGL.Tests where
 import           Control.Arrow
 import           Control.Monad
 import           Data.Earnest.Currency
+import           Data.Earnest.EGraph
 import           Data.Earnest.EGraph.FGL
 import           Data.Earnest.TestData
 import           Data.Earnest.TestData.TH

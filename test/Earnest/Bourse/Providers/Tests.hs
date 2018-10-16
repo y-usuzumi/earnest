@@ -3,6 +3,7 @@ module Earnest.Bourse.Providers.Tests where
 import           Control.Lens
 import           Control.Monad.State
 import           Data.Earnest.Bourse
+import           Data.Earnest.EGraph
 import           Data.Earnest.EGraph.FGL
 import           Data.Graph.Inductive
 import           Data.Maybe
@@ -49,7 +50,7 @@ testAEXAPI = askOption $ \env -> testCase "AEXAPI" $ do
   let cfg = earnestConfig env
   aexapi <- initAEXAPI cfg
   bi <- loadInfo aexapi
-  g <- graphFromBourses [HBourse aexapi]
+  (g :: FGLGraph) <- graphFromBourses [HBourse aexapi]
   forM_ (labEdges g) $ \(n1, n2, ei) ->
     printf "%s -> %s\n" (show $ fromJust (lab g n1) ^. currency) (show $ fromJust (lab g n2) ^. currency)
 
