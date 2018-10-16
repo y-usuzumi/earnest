@@ -1,32 +1,32 @@
-name:                earnest
-version:             0.1.0.0
-github:              "github.com/y-usuzumi/earnest"
-license:             BSD3
-author:              "Yukio Usuzumi"
-maintainer:          "anohigisavay@gmail.com"
-copyright:           "2018 Yukio Usuzumi"
-
-extra-source-files:
-- README.md
-- ChangeLog.md
-
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Web
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/earnest#readme>
-
+library:
+  source-dirs: src
+tests:
+  earnest-test:
+    source-dirs: test
+    main: Spec.hs
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - ListLike
+    - earnest
+copyright: 2018 Yukio Usuzumi
+maintainer: anohigisavay@gmail.com
+ghc-options:
+- -Werror
+- -fwarn-missing-methods
+- -fwarn-missing-fields
 dependencies:
 - aeson
 - async
 - base >= 4.7 && < 5
 - bytestring
 - containers
+- data-default
 - exceptions
 - fgl == 5.6.0.0
+- hasbolt
 - hashable
 - hashing
 - lens >= 4.17
@@ -45,11 +45,11 @@ dependencies:
 - webdriver
 - wreq
 - yaml
-
 default-extensions:
 - DeriveAnyClass
 - DeriveFunctor
 - DeriveGeneric
+- DuplicateRecordFields
 - FlexibleContexts
 - FlexibleInstances
 - GADTs
@@ -64,34 +64,22 @@ default-extensions:
 - TemplateHaskell
 - TupleSections
 - TypeFamilies
-
-ghc-options:
-- -Werror
-# - -fwarn-incomplete-uni-patterns
-- -fwarn-missing-methods
-- -fwarn-missing-fields
-
-library:
-  source-dirs: src
-
+name: earnest
+version: 0.1.0.0
+extra-source-files:
+- README.md
+- ChangeLog.md
+author: Yukio Usuzumi
+github: github.com/y-usuzumi/earnest
+license: BSD3
 executables:
   earnest-exe:
-    main:                Main.hs
-    source-dirs:         app
+    source-dirs: app
+    main: Main.hs
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
     - earnest
-
-tests:
-  earnest-test:
-    main:                Spec.hs
-    source-dirs:         test
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - earnest
+description: Please see the README on GitHub at <https://github.com/githubuser/earnest#readme>

@@ -1,20 +1,23 @@
 bourses:  # You can add multiple entries for each bourse type
-- type: aex
-  username: <username>
-  password: <password>
-- type: aexapi
-  uid: <uid>
-  key: <key>
-  skey: <skey>
-- type: gatehub
-  username: <username>
-  password: <password>
+- type: "aex"
+  username: "<username>"
+  password: "<password>"
+- type: "aexapi"
+  uid: "<uid>"
+  key: "<key>"
+  skey: "<skey>"
+- type: "gatehub"
+  username: "<username>"
+  password: "<password>"
 
 engine:
-- type: neo4j
-  username: <username>
-  password: <password>
-  host: <host>
+- type: "neo4j"
+  host: "<host>"
+  port: "<port>"
+  username: "<username>"
+  password: "<password>"
+  secure: true
+
 
 # The in-memory FGL graph engine
 # engine:

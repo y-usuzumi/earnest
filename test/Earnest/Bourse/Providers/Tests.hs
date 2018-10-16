@@ -13,7 +13,6 @@ import           Earnest.Bourse.Providers.GateHub
 import           Earnest.Config
 import           System.Environment
 import           Test.Earnest.Env
-import           Test.Earnest.Utils.TH
 import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Text.Printf
@@ -21,25 +20,22 @@ import           Text.Printf
 
 -- AEX
 
-initAEX :: Config -> IO AEXBourse
-initAEX cfg = do
-  let AEXBourseConfig{..} = $(findBourseConfig 'cfg 'AEXBourseConfig)
+initAEX :: AEXConfig -> IO AEXBourse
+initAEX AEXConfig{..} = do
   return AEXBourse{ username = username
                   , password = password
                   }
 
 testAEX :: TestTree
 testAEX = askOption $ \env -> testCase "AEX" $ do
-  let cfg = earnestConfig env
-  aex <- initAEX cfg
+  aex <- initAEX $ aex env
   bi <- loadInfo aex
   print bi
 
 -- AEXAPI
 
-initAEXAPI :: Config -> IO AEXAPIBourse
-initAEXAPI cfg = do
-  let AEXAPIBourseConfig{..} = $(findBourseConfig 'cfg 'AEXAPIBourseConfig)
+initAEXAPI :: AEXAPIConfig -> IO AEXAPIBourse
+initAEXAPI AEXAPIConfig{..} = do
   return AEXAPIBourse{ uid = uid
                      , key = key
                      , skey = skey
@@ -47,8 +43,7 @@ initAEXAPI cfg = do
 
 testAEXAPI :: TestTree
 testAEXAPI = askOption $ \env -> testCase "AEXAPI" $ do
-  let cfg = earnestConfig env
-  aexapi <- initAEXAPI cfg
+  aexapi <- initAEXAPI $ aexapi env
   bi <- loadInfo aexapi
   (g :: FGLGraph) <- graphFromBourses [HBourse aexapi]
   forM_ (labEdges g) $ \(n1, n2, ei) ->
@@ -56,17 +51,15 @@ testAEXAPI = askOption $ \env -> testCase "AEXAPI" $ do
 
 -- GateHub
 
-initGateHub :: Config -> IO GateHubBourse
-initGateHub cfg = do
-  let GateHubBourseConfig{..} = $(findBourseConfig 'cfg 'GateHubBourseConfig)
+initGateHub :: GateHubConfig -> IO GateHubBourse
+initGateHub GateHubConfig{..} = do
   return GateHubBourse{ username = username
                       , password = password
                       }
 
 testGateHub :: TestTree
 testGateHub = askOption $ \env -> testCase "GateHub" $ do
-  let cfg = earnestConfig env
-  gateHub <- initGateHub cfg
+  gateHub <- initGateHub $ gatehub env
   bi <- loadInfo gateHub
   return ()
 

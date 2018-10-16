@@ -27,8 +27,25 @@ deriveJSON defaultOptions{ sumEncoding = defaultTaggedObject{ tagFieldName = "ty
                              a -> a
                          } ''BourseConfig
 
+data Engine = Neo4jEngine { host :: String
+                          , port :: Int
+                          , username :: String
+                          , password :: String
+                          }
+            | FGL
+            deriving (Generic, Show)
+
+deriveJSON defaultOptions{ sumEncoding = defaultTaggedObject{ tagFieldName = "type"
+                                                            }
+                         , constructorTagModifier = \case
+                             "Neo4jEngine" -> "neo4j"
+                             "FGL" -> "fgl"
+                             a -> a
+                         } ''Engine
+
 
 data Config = Config { bourses :: [BourseConfig]
+                     , engine :: Engine
                      } deriving (Generic, Show, FromJSON, ToJSON)
 
 config :: IORef Config

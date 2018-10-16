@@ -1,0 +1,20 @@
+neo4j:
+  username: "<username>"
+  password: "<password>"
+  host: "<host>"
+  port: "<port>"
+
+aex:
+  username: "<username>"
+  password: "<password>"
+
+aexapi:
+  uid: "<uid>"
+  key: "<key>"
+  skey: "<skey>"
+
+gatehub:
+  username: "<username>"
+  password: "<password>"
+
+bourses: []
