@@ -7,18 +7,19 @@ import           Test.Earnest.Env
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-boltDef :: B.BoltCfg
-boltDef = def
-
 withNeo4jEnv :: (IO B.Pipe -> TestTree) -> TestTree
 withNeo4jEnv t =
   askOption $ \TestEnv{..} -> let
-    boltCfg = boltDef { host = host neo4j
-                      , port = port neo4j
-                      , username = T.pack $ username (neo4j :: Neo4jConfig)
-                      , password = T.pack $ password (neo4j :: Neo4jConfig)
-                      }
+    boltCfg = def { B.host = host neo4j
+                  , B.port = port neo4j
+                  , B.user = T.pack $ username (neo4j :: Neo4jConfig)
+                  , B.password = T.pack $ password (neo4j :: Neo4jConfig)
+                  }
     in t (B.connect boltCfg)
 
 testCreatingNodes :: TestTree
 testCreatingNodes = testCase "testCreatingNodes" $ 1 @?= 1
+
+tests :: TestTree
+tests = testGroup "Neo4j" [ testCreatingNodes
+                          ]
