@@ -1,8 +1,12 @@
 module Data.Earnest.EGraph.Neo4j.Tests where
 
 import           Data.Default
-import           Data.Text          as T
-import qualified Database.Bolt      as B
+import           Data.Earnest.EGraph
+import           Data.Earnest.EGraph.Neo4j
+import           Data.Earnest.TestData
+import           Data.Earnest.TestData.TH
+import           Data.Text                 as T
+import qualified Database.Bolt             as B
 import           Test.Earnest.Env
 import           Test.Earnest.Utils
 import           Test.Tasty
@@ -21,14 +25,18 @@ withNeo4jEnv testName assertion =
       p <- B.connect boltCfg
       B.run p $ B.query "match (n) delete n"
       return p
-    finalizer = \p -> do
+    finalizer p = do
       B.run p $ B.query "match (n) delete n"
       B.close p
 
 testGraphFromBourses :: TestTree
 testGraphFromBourses = withNeo4jEnv "creatingNodes" $ \p -> do
-  graphFromBourses
+  let bs = $(boursesFromNames [ [|Bourse1|]
+                              , [|Bourse2|]
+                              ])
+  (g :: Neo4jGraph) <- graphFromBourses p bs
+  print g
 
 tests :: TestTree
-tests = testGroup "Neo4j" [ testCreatingNodes
+tests = testGroup "Neo4j" [ testGraphFromBourses
                           ]

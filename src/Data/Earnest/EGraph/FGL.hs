@@ -18,8 +18,10 @@ import           Data.List
 type FGLGraph = Gr ENodeInfo EEdgeInfo
 
 instance EGraph FGLGraph where
+  type Driver FGLGraph = ()
+
   -- FIXME: Nodes should be uniquely identified by (Currency, HBourse) pairs
-  graphFromBourses bourses = do
+  graphFromBourses _ bourses = do
     bis <- mapM (\(HBourse b) -> loadInfo b) bourses
     let b_bi_pairs = zip bourses bis
         b_c_c_ti_pairs = map (fst &&& toList . view supportedTrades . snd) b_bi_pairs
@@ -35,14 +37,13 @@ instance EGraph FGLGraph where
       mkEdge (x, (f, t, ti)) = (fromEnum f, fromEnum t, ETrade x ti)
       folder l (f, t, ti) = f:t:l
 
-  getTradableOptions c g = map (r c) $ lsuc g (fromEnum c)
+  getTradableOptions _ g c = map (r c) $ lsuc g (fromEnum c)
     where
       r c (n, ETrade x ti) = (x, c, toEnum n, ti)
 
   findProfitablePaths = undefined
+  explain _ = prettyPrint
 
 isCurrencySupported :: Currency -> FGLGraph -> Bool
 isCurrencySupported c = gelem (fromEnum c)
 
-explain :: FGLGraph -> IO ()
-explain = prettyPrint

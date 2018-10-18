@@ -45,7 +45,7 @@ testAEXAPI :: TestTree
 testAEXAPI = askOption $ \env -> testCase "AEXAPI" $ do
   aexapi <- initAEXAPI $ aexapi env
   bi <- loadInfo aexapi
-  (g :: FGLGraph) <- graphFromBourses [HBourse aexapi]
+  (g :: FGLGraph) <- graphFromBourses () [HBourse aexapi]
   forM_ (labEdges g) $ \(n1, n2, ei) ->
     printf "%s -> %s\n" (show $ fromJust (lab g n1) ^. currency) (show $ fromJust (lab g n2) ^. currency)
 

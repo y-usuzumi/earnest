@@ -56,6 +56,7 @@ default-extensions:
 - FlexibleInstances
 - GADTs
 - LambdaCase
+- MultiParamTypeClasses
 - OverloadedStrings
 - QuasiQuotes
 - PartialTypeSignatures

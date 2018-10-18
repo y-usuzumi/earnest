@@ -23,6 +23,8 @@ data EEdgeInfo = ETrade HBourse TradeInfo
 
 
 class EGraph g where
-  graphFromBourses :: MonadIO m => [HBourse] -> m g
-  getTradableOptions :: Currency -> g -> [(HBourse, Currency, Currency, TradeInfo)]
-  findProfitablePaths :: g -> [(ENodeInfo, EEdgeInfo, ENodeInfo)]
+  type Driver g
+  graphFromBourses :: MonadIO m => Driver g -> [HBourse] -> m g
+  getTradableOptions :: Driver g -> g -> Currency -> [(HBourse, Currency, Currency, TradeInfo)]
+  findProfitablePaths :: Driver g -> g -> [(ENodeInfo, EEdgeInfo, ENodeInfo)]
+  explain :: Driver g -> g -> IO ()
