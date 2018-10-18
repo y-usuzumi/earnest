@@ -29,6 +29,7 @@ dependencies:
 - hasbolt
 - hashable
 - hashing
+- interpolate
 - lens >= 4.17
 - monad-control
 - mtl
@@ -42,6 +43,7 @@ dependencies:
 - unliftio-core
 - unliftio
 - unordered-containers
+- uuid
 - webdriver
 - wreq
 - yaml

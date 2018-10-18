@@ -10,7 +10,6 @@ import           Data.Earnest.TradeInfo
 import           Data.Earnest.TransferInfo
 
 
-
 data ENodeInfo = ENodeInfo { _currency :: Currency
                            , _exchange :: HBourse
                            } deriving Show

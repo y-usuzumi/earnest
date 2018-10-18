@@ -14,6 +14,7 @@ import qualified Data.Set                 as S
 import           Data.Typeable
 import           Text.Printf
 
+
 data BourseException = LoadInfoFailed String
                      deriving Show
 

@@ -14,6 +14,7 @@ import           Data.Earnest.Wallet       hiding (Currency)
 import           Data.Graph.Inductive
 import           Data.List
 
+
 type FGLGraph = Gr ENodeInfo EEdgeInfo
 
 instance EGraph FGLGraph where

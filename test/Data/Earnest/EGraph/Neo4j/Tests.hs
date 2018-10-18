@@ -25,9 +25,9 @@ withNeo4jEnv testName assertion =
       B.run p $ B.query "match (n) delete n"
       B.close p
 
-testCreatingNodes :: TestTree
-testCreatingNodes = withNeo4jEnv "creatingNodes" $ \p -> do
-  1 @?= 1
+testGraphFromBourses :: TestTree
+testGraphFromBourses = withNeo4jEnv "creatingNodes" $ \p -> do
+  graphFromBourses
 
 tests :: TestTree
 tests = testGroup "Neo4j" [ testCreatingNodes
