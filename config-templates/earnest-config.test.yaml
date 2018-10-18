@@ -2,7 +2,7 @@ neo4j:
   username: "neo4j"
   password: "neo4j"
   host: "localhost"
-  port: "7687"
+  port: 7687
 
 aex:
   username: "<username>"

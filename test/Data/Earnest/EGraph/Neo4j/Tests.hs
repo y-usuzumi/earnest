@@ -18,8 +18,12 @@ withNeo4jEnv testName assertion =
                         , B.user = T.pack $ username (neo4j :: Neo4jConfig)
                         , B.password = T.pack $ password (neo4j :: Neo4jConfig)
                         }
-      B.connect boltCfg
-    finalizer = B.close
+      p <- B.connect boltCfg
+      B.run p $ B.query "match (n) delete n"
+      return p
+    finalizer = \p -> do
+      B.run p $ B.query "match (n) delete n"
+      B.close p
 
 testCreatingNodes :: TestTree
 testCreatingNodes = withNeo4jEnv "creatingNodes" $ \p -> do
