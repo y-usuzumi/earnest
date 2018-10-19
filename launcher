@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import abc
 import argparse
-import os
+import subprocess
 import sys
 
 _SELENIUM_PATH = "/usr/share/selenium-server/selenium-server-standalone.jar"
@@ -41,7 +41,7 @@ class Command(metaclass=abc.ABCMeta):
 
 class InstallCommand(Command):
     def run(self):
-        os.system("stack install")
+        subprocess.call(["stack", "install"])
 
 
 class TestCommand(Command):
@@ -50,26 +50,26 @@ class TestCommand(Command):
         ta_args = ["-c", ".earnest-config.test.yaml"]
 
         if self._args.pattern is not None:
-            ta_args.append("-p %s" % self._args.pattern)
+            ta_args.extend(["-p", self._args.pattern])
         elif self._args.list:
             ta_args.append("-l")
         if ta_args:
-            self._cmd = "stack test --ta '%s'" % ' '.join(ta_args)
+            self._cmd_args = ["stack", "test", "--ta"] + [" ".join(ta_args)]
         else:
-            self._cmd = "stack test"
+            self._cmd_args = ["stack", "test"]
 
     def run(self):
-        os.system(self._cmd)
+        subprocess.call(self._cmd_args)
 
 
 class ReplCommand(Command):
     def run(self):
-        os.system("stack repl")
+        subprocess.call(["stack", "repl"])
 
 
 class SeleniumCommand(Command):
     def run(self):
-        os.system("java -jar %s" % _SELENIUM_PATH)
+        subprocess.call(["java", "-jar", _SELENIUM_PATH])
 
 
 _cmd_mapper = {
