@@ -2,21 +2,54 @@ module Test.Earnest.Utils where
 
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
+import           Control.Monad.Reader
+import           Data.Default
+import           Data.Text              as T
+import qualified Database.Bolt          as B
 import           Test.Earnest.Env
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
-testWithEnv :: TestName -> (TestEnv -> Assertion) -> TestTree
-testWithEnv testName assertion = askOption $ \env ->
-  testCase testName (assertion env)
+data ResourceControl a = RC { initialize :: TestEnv -> IO a
+                            , finalize   :: a -> IO ()
+                            }
 
--- TODO: MonadControlIO
-testWithResource :: TestName
-                 -> (TestEnv -> IO a)
-                 -> (a -> Assertion)
-                 -> (a -> IO ())
-                 -> TestTree
-testWithResource testName initializer assertion finalizer =
-  testWithEnv testName $ \env -> do
-  a <- initializer env
-  assertion a `finally` finalizer a
+infix 9 &
+(&) :: ResourceControl a -> ResourceControl b -> ResourceControl (a, b)
+rcA & rcB = let
+  i env = (,) <$> initialize rcA env <*> initialize rcB env
+  f (a, b) = finalize rcB b `finally` finalize rcA a
+  in RC { initialize = i
+        , finalize = f
+        }
+
+runResourceControl :: ResourceControl a -> TestEnv -> (a -> Assertion) -> Assertion
+runResourceControl RC{..} env assertion = do
+  res <- initialize env
+  assertion res `finally` finalize res
+
+neo4j :: ResourceControl B.Pipe
+neo4j = RC { initialize = i
+           , finalize = f
+           }
+  where
+    i TestEnv{..} = do
+      let boltCfg = def { B.host = host neo4j
+                        , B.port = port neo4j
+                        , B.user = T.pack $ username (neo4j :: Neo4jConfig)
+                        , B.password = T.pack $ password (neo4j :: Neo4jConfig)
+                        }
+      p <- B.connect boltCfg
+      B.run p $ B.query "match (n) delete n"
+      return p
+    f p = do
+      B.run p $ B.query "match (n) delete n"
+      B.close p
+
+withRC :: ResourceControl a -> (a -> ReaderT TestEnv IO ()) -> ReaderT TestEnv IO ()
+withRC a assertion = do
+  env <- ask
+  liftIO $ runResourceControl a env $ \res -> runReaderT (assertion res) env
+
+testCaseRC :: TestName -> ReaderT TestEnv IO () -> TestTree
+testCaseRC name r = askOption $ \env -> testCase name $ runReaderT r env
