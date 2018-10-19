@@ -18,16 +18,24 @@ import qualified Database.Bolt                    as B
 type Q p = forall m. MonadIO m => B.Pipe -> p -> m [B.Record]
 type Q_ p = forall m. MonadIO m => B.Pipe -> p -> m ()
 
-qMerge :: Q_ (Currency, HBourse)
-qMerge p (currency, bourse) = let
-  in B.run p $ B.queryP_ stmt $ M.fromList [ ("c", B.T $ T.pack $ show currency)
-                                           , ("b", B.T $ T.pack $ show bourse)
-                                           ]
+qMerge :: Q_ (UUID, (Currency, HBourse), (Currency, HBourse))
+qMerge p (gid, (fc, fb), (tc, tb)) = do
+  B.run p $ B.queryP_ stmt $ M.fromList [ ("gid", B.T $ T.pack $ show gid)
+                                        , ("fc", B.T $ T.pack $ show fc)
+                                        , ("fb", B.T $ T.pack $ show fb)
+                                        , ("tc", B.T $ T.pack $ show tc)
+                                        , ("tb", B.T $ T.pack $ show tb)
+                                        ]
   where
     stmt = [i|
              MERGE (p:Currency {
-               c: $c,
-               b: $b
+               gid: $gid,
+               c: $fc,
+               b: $fb
+             })-[:t]->(q:Currency {
+               gid: $gid,
+               c: $tc,
+               b: $tb
              })
              |]
 
@@ -38,16 +46,16 @@ instance EGraph Neo4jGraph where
   type Driver Neo4jGraph = B.Pipe
 
   graphFromBourses driver bourses = do
-    uuid <- liftIO nextRandom
+    gid <- liftIO nextRandom
     bis <- mapM (\(HBourse b) -> loadInfo b) bourses
     forM_ (zip bourses bis) $ \(b, bi) -> do
       let ls = TI.toList $ bi ^. supportedTrades
       forM_ ls $ \(f, t, _) -> do
-        qMerge driver (f, b)
-        qMerge driver (t, b)
-
-    return $ Neo4jGraph uuid
+        qMerge driver (gid, (f, b), (t, b))
+    return $ Neo4jGraph gid
 
   getTradableOptions = undefined
+
   findProfitablePaths = undefined
+
   explain _ = print

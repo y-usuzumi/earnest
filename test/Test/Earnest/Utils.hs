@@ -4,8 +4,9 @@ import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Control.Monad.Reader
 import           Data.Default
-import           Data.Text              as T
-import qualified Database.Bolt          as B
+import           Data.String.Interpolate.IsString
+import           Data.Text               as T
+import qualified Database.Bolt           as B
 import           Test.Earnest.Env
 import           Test.Tasty
 import           Test.Tasty.HUnit
@@ -19,10 +20,10 @@ data ResourceControl a = RC { initialize :: TestEnv -> IO a
 infix 9 &
 (&) :: ResourceControl a -> ResourceControl b -> ResourceControl (a, b)
 rcA & rcB = let
-  i env = (,) <$> initialize rcA env <*> initialize rcB env
-  f (a, b) = finalize rcB b `finally` finalize rcA a
-  in RC { initialize = i
-        , finalize = f
+  fi env = (,) <$> initialize rcA env <*> initialize rcB env
+  ff (a, b) = finalize rcB b `finally` finalize rcA a
+  in RC { initialize = fi
+        , finalize = ff
         }
 
 runRC :: ResourceControl a -> TestEnv -> (a -> Assertion) -> Assertion
@@ -30,22 +31,31 @@ runRC RC{..} env assertion = do
   res <- initialize env
   assertion res `finally` finalize res
 
+env :: ResourceControl TestEnv
+env = RC { initialize = return
+         , finalize = void . return
+         }
+
 neo4j :: ResourceControl B.Pipe
-neo4j = RC { initialize = i
-           , finalize = f
+neo4j = RC { initialize = fi
+           , finalize = ff
            }
   where
-    i TestEnv{..} = do
+    clearAll p = void $ B.run p $ B.query [i|
+                                            MATCH (n)
+                                            DETACH DELETE n
+                                            |]
+    fi TestEnv{..} = do
       let boltCfg = def { B.host = host neo4j
                         , B.port = port neo4j
                         , B.user = T.pack $ username (neo4j :: Neo4jConfig)
                         , B.password = T.pack $ password (neo4j :: Neo4jConfig)
                         }
       p <- B.connect boltCfg
-      B.run p $ B.query "match (n) delete n"
+      clearAll p
       return p
-    f p = do
-      B.run p $ B.query "match (n) delete n"
+    ff p = do
+      -- clearAll p
       B.close p
 
 withRC :: ResourceControl a -> (a -> RCAssertion) -> RCAssertion
