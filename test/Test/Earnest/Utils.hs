@@ -10,6 +10,8 @@ import           Test.Earnest.Env
 import           Test.Tasty
 import           Test.Tasty.HUnit
 
+type RCAssertion = ReaderT TestEnv IO ()
+
 data ResourceControl a = RC { initialize :: TestEnv -> IO a
                             , finalize   :: a -> IO ()
                             }
@@ -23,8 +25,8 @@ rcA & rcB = let
         , finalize = f
         }
 
-runResourceControl :: ResourceControl a -> TestEnv -> (a -> Assertion) -> Assertion
-runResourceControl RC{..} env assertion = do
+runRC :: ResourceControl a -> TestEnv -> (a -> Assertion) -> Assertion
+runRC RC{..} env assertion = do
   res <- initialize env
   assertion res `finally` finalize res
 
@@ -46,10 +48,10 @@ neo4j = RC { initialize = i
       B.run p $ B.query "match (n) delete n"
       B.close p
 
-withRC :: ResourceControl a -> (a -> ReaderT TestEnv IO ()) -> ReaderT TestEnv IO ()
+withRC :: ResourceControl a -> (a -> RCAssertion) -> RCAssertion
 withRC a assertion = do
   env <- ask
-  liftIO $ runResourceControl a env $ \res -> runReaderT (assertion res) env
+  liftIO $ runRC a env $ \res -> runReaderT (assertion res) env
 
-testCaseRC :: TestName -> ReaderT TestEnv IO () -> TestTree
+testCaseRC :: TestName -> RCAssertion -> TestTree
 testCaseRC name r = askOption $ \env -> testCase name $ runReaderT r env
