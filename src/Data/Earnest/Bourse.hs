@@ -14,6 +14,10 @@ import qualified Data.Set                 as S
 import           Data.Typeable
 import           Text.Printf
 
+-- data UpdateTradeOperation = NewCurrency Currency
+--                           | RemoveCurrency Currency
+--                           | UpdateRate (Currency, Currency) Double
+--                           | UpdateFee (Currency, Currency) Double
 
 data BourseException = LoadInfoFailed String
                      deriving Show
@@ -22,6 +26,7 @@ instance Exception BourseException
 
 class (Hashable e, Show e, Typeable e) => Bourse e where
   loadInfo :: MonadIO m => e -> m BourseInfo
+  updateBourseInfo :: MonadIO m => e -> BourseInfo -> m BourseInfo
 
 data HBourse where
   HBourse :: Bourse e => e -> HBourse

@@ -110,3 +110,4 @@ instance Bourse AEXBourse where
                     _       -> liftIO $ printf "Invalid currency pair input: %s" elemPair >> return Nothing
                 return $ catMaybes maybeValidPairs
             return $ return response
+  updateBourseInfo = undefined

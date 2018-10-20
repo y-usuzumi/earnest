@@ -1,17 +1,46 @@
 module Data.Earnest.TradeInfo where
 
 import           Control.Monad.State
-import           Data.Hashable
-import qualified Data.HashMap.Lazy   as HM
-import qualified Data.HashSet        as S
-import           Data.List
+import           Data.Default
 import           Data.Earnest.Currency
+import           Data.Hashable
+import qualified Data.HashMap.Lazy     as HM
+import qualified Data.HashSet          as S
+import           Data.List
 import           GHC.Generics
 
 type TradeInfoTable = HM.HashMap Currency (HM.HashMap Currency TradeInfo)
 
-data TradeInfo = TradeInfo { fee          :: Double
-                           } deriving (Eq, Generic, Hashable, Show)
+data TradeInfo = TradeInfo { fee   :: Double
+                           , buy   :: Double
+                           , sell  :: Double
+                           , high  :: Double
+                           , low   :: Double
+                           , last  :: Double
+                           , vol   :: Double
+                           , depth :: Depth
+                           } deriving (Generic, Show)
+
+instance Default TradeInfo where
+  def = TradeInfo { fee = 0
+                  , buy = 0
+                  , sell = 0
+                  , high = 0
+                  , low = 0
+                  , last = 0
+                  , vol = 0
+                  , depth = Depth { asks = []
+                                  , bids = []
+                                  }
+                  }
+
+data Depth = Depth { asks :: [PO]
+                   , bids :: [PO]
+                   } deriving Show
+
+data PO = PO { price  :: Double
+             , amount :: Double
+             } deriving Show
 
 newTradeInfoTable :: TradeInfoTable
 newTradeInfoTable = HM.empty

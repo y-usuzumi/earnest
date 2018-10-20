@@ -10,6 +10,7 @@ import           Crypto.Hash
 import           Data.Aeson                 hiding (Options)
 import qualified Data.ByteString.Char8      as SBS
 import qualified Data.ByteString.Lazy.Char8 as LBS
+import           Data.Default
 import           Data.Earnest.Bourse
 import           Data.Earnest.Currency
 import           Data.Earnest.TradeInfo
@@ -204,20 +205,20 @@ instance Bourse AEXAPIBourse where
     cncCurrencies <- case tickerCNCResult of
       Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
       Right (APISuccess _ d)  -> return $ foldMap stc (HM.keys d)
-    let cncCCTIs = map (, CNC, TradeInfo{ fee = 0 }) cncCurrencies
-    let cncCCTIs' = map (CNC, , TradeInfo{ fee = 0 }) cncCurrencies
+    let cncCCTIs = map (, CNC, def) cncCurrencies
+    let cncCCTIs' = map (CNC, , def) cncCurrencies
     tickerUSDTResult <- liftIO $ ticker b "usdt"
     usdtCurrencies <- case tickerUSDTResult of
       Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
       Right (APISuccess _ d)  -> return $ foldMap stc (HM.keys d)
-    let usdtCCTIs = map (, USDT, TradeInfo{ fee = 0 }) usdtCurrencies
-    let usdtCCTIs' = map (USDT, , TradeInfo{ fee = 0 }) usdtCurrencies
+    let usdtCCTIs = map (, USDT, def) usdtCurrencies
+    let usdtCCTIs' = map (USDT, , def) usdtCurrencies
     tickerGATResult <- liftIO $ ticker b "gat"
     gatCurrencies <- case tickerGATResult of
       Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
       Right (APISuccess _ d)  -> return $ foldMap stc (HM.keys d)
-    let gatCCTIs = map (, GAT, TradeInfo{ fee = 0 }) gatCurrencies
-    let gatCCTIs' = map (GAT, , TradeInfo{ fee = 0 }) gatCurrencies
+    let gatCCTIs = map (, GAT, def) gatCurrencies
+    let gatCCTIs' = map (GAT, , def) gatCurrencies
     let tradeInfoTable = flip execState newTradeInfoTable $ do
           merge cncCCTIs
           merge cncCCTIs'
@@ -240,4 +241,5 @@ instance Bourse AEXAPIBourse where
           Nothing -> newMap
       stc s = case HM.lookup s currencyNameMapping of
         Just curr -> [curr]
-        Nothing -> []
+        Nothing   -> []
+  updateBourseInfo = undefined

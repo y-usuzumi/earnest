@@ -52,3 +52,4 @@ instance Bourse GateHubBourse where
                      , _balances = newBalanceTable  -- FIXME
                      , _confidence = 1.0
                      }
+  updateBourseInfo = undefined
