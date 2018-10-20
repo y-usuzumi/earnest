@@ -18,26 +18,44 @@ import qualified Database.Bolt                    as B
 type Q p = forall m. MonadIO m => B.Pipe -> p -> m [B.Record]
 type Q_ p = forall m. MonadIO m => B.Pipe -> p -> m ()
 
-qMerge :: Q_ (UUID, (Currency, HBourse), (Currency, HBourse))
-qMerge p (gid, (fc, fb), (tc, tb)) = do
-  B.run p $ B.queryP_ stmt $ M.fromList [ ("gid", B.T $ T.pack $ show gid)
-                                        , ("fc", B.T $ T.pack $ show fc)
-                                        , ("fb", B.T $ T.pack $ show fb)
-                                        , ("tc", B.T $ T.pack $ show tc)
-                                        , ("tb", B.T $ T.pack $ show tb)
-                                        ]
+qMerge :: Q_ (UUID, (Currency, HBourse), (Currency, HBourse), TradeInfo)
+qMerge p (gid, (fc, fb), (tc, tb), ti) = do
+  mergeNode p gid fc fb
+  mergeNode p gid tc tb
+  mergeRelation p gid fc fb tc tb
   where
-    stmt = [i|
-             MERGE (p:Currency {
-               gid: $gid,
-               c: $fc,
-               b: $fb
-             })-[:t]->(q:Currency {
-               gid: $gid,
-               c: $tc,
-               b: $tb
-             })
-             |]
+    mergeNodeStmt = [i|
+                      MERGE (:Currency {
+                      gid: $gid,
+                      c: $c,
+                      b: $b
+                      })
+                      |]
+    mergeRelationStmt = [i|
+                          MATCH (f:Currency {
+                          gid: $gid,
+                          c: $fc,
+                          b: $fb
+                          }), (t:Currency {
+                          gid: $gid,
+                          c: $tc,
+                          b: $tb
+                          })
+                          MERGE (f)-[:TradeInfo{f:$f}]->(t)
+                          |]
+    mergeNode p gid c b =
+      B.run p $ B.queryP_ mergeNodeStmt $ M.fromList [ ("gid", B.T $ T.pack $ show gid)
+                                                     , ("c", B.T $ T.pack $ show c)
+                                                     , ("b", B.T $ T.pack $ show b)
+                                                     ]
+    mergeRelation p gid fc fb tc tb =
+      B.run p $ B.queryP_ mergeRelationStmt $ M.fromList [ ("gid", B.T $ T.pack $ show gid)
+                                                         , ("fc", B.T $ T.pack $ show fc)
+                                                         , ("fb", B.T $ T.pack $ show fb)
+                                                         , ("tc", B.T $ T.pack $ show tc)
+                                                         , ("tb", B.T $ T.pack $ show tb)
+                                                         , ("f", B.F $  fee ti)
+                                                         ]
 
 newtype Neo4jGraph = Neo4jGraph UUID
                    deriving Show
@@ -50,8 +68,8 @@ instance EGraph Neo4jGraph where
     bis <- mapM (\(HBourse b) -> loadInfo b) bourses
     forM_ (zip bourses bis) $ \(b, bi) -> do
       let ls = TI.toList $ bi ^. supportedTrades
-      forM_ ls $ \(f, t, _) -> do
-        qMerge driver (gid, (f, b), (t, b))
+      forM_ ls $ \(f, t, ti) -> do
+        qMerge driver (gid, (f, b), (t, b), ti)
     return $ Neo4jGraph gid
 
   getTradableOptions = undefined
