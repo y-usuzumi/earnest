@@ -100,9 +100,9 @@ instance Bourse AEXBourse where
               when (isNothing maybeElemPairs) $ exit []
               let elemPairs = fromJust maybeElemPairs
               lift $ do
-                cleanedPairs <- forM elemPairs (
-                  \elemPair -> fmap fromJust $ attr elemPair "innerText"
-                  ) >>= return . filter (not . T.null)
+                cleanedPairs <- filter (not . T.null) <$>forM elemPairs (
+                  \elemPair -> fromJust <$> attr elemPair "innerText"
+                  )
                 maybeValidPairs <- forM cleanedPairs $ \elemPair -> do
                   let pair = T.splitOn "/" elemPair
                   case pair of

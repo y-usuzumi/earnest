@@ -14,12 +14,14 @@ import qualified Data.Text                        as T
 import           Data.UUID
 import           Data.UUID.V4
 import qualified Database.Bolt                    as B
+import           Prelude                          hiding (last)
 
 type Q p = forall m. MonadIO m => B.Pipe -> p -> m [B.Record]
 type Q_ p = forall m. MonadIO m => B.Pipe -> p -> m ()
 
 qMerge :: Q_ (UUID, (Currency, HBourse), (Currency, HBourse), TradeInfo)
 qMerge p (gid, (fc, fb), (tc, tb), ti) = do
+  liftIO $ putStrLn [i|Merging #{fc} -> #{tc}|]
   mergeNode p gid fc fb
   mergeNode p gid tc tb
   mergeRelation p gid fc fb tc tb
@@ -41,7 +43,16 @@ qMerge p (gid, (fc, fb), (tc, tb), ti) = do
                           c: $tc,
                           b: $tb
                           })
-                          MERGE (f)-[:TradeInfo{f:$f}]->(t)
+                          MERGE (f)-[:TradeInfo{
+                            f:$fee,
+                            b:$buy,
+                            s:$sell,
+                            h:$high,
+                            l:$low,
+                            p:$last,
+                            v:$vol,
+                            d:[]
+                            }]->(t)
                           |]
     mergeNode p gid c b =
       B.run p $ B.queryP_ mergeNodeStmt $ M.fromList [ ("gid", B.T $ T.pack $ show gid)
@@ -54,7 +65,13 @@ qMerge p (gid, (fc, fb), (tc, tb), ti) = do
                                                          , ("fb", B.T $ T.pack $ show fb)
                                                          , ("tc", B.T $ T.pack $ show tc)
                                                          , ("tb", B.T $ T.pack $ show tb)
-                                                         , ("f", B.F $  fee ti)
+                                                         , ("fee", B.F $ fee ti)
+                                                         , ("buy", B.F $ buy ti)
+                                                         , ("sell", B.F $ sell ti)
+                                                         , ("high", B.F $ high ti)
+                                                         , ("low", B.F $ low ti)
+                                                         , ("last", B.F $ last ti)
+                                                         , ("vol", B.F $ vol ti)
                                                          ]
 
 newtype Neo4jGraph = Neo4jGraph UUID

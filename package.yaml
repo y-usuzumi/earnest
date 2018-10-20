@@ -48,6 +48,7 @@ dependencies:
 - wreq
 - yaml
 default-extensions:
+- ConstraintKinds
 - DeriveAnyClass
 - DeriveFunctor
 - DeriveGeneric

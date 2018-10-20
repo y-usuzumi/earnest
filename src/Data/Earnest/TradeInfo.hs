@@ -19,7 +19,17 @@ data TradeInfo = TradeInfo { fee   :: Double
                            , last  :: Double
                            , vol   :: Double
                            , depth :: Depth
-                           } deriving (Generic, Show)
+                           }
+               | RTradeInfo { fee   :: Double
+                            , buy   :: Double
+                            , sell  :: Double
+                            , high  :: Double
+                            , low   :: Double
+                            , last  :: Double
+                            , vol   :: Double
+                            , depth :: Depth
+                            }
+               deriving (Generic, Show)
 
 instance Default TradeInfo where
   def = TradeInfo { fee = 0
@@ -37,6 +47,11 @@ instance Default TradeInfo where
 data Depth = Depth { asks :: [PO]
                    , bids :: [PO]
                    } deriving Show
+
+instance Default Depth where
+  def = Depth { asks = []
+              , bids = []
+              }
 
 data PO = PO { price  :: Double
              , amount :: Double

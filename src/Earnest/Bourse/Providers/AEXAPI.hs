@@ -7,23 +7,26 @@ import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Control.Monad.State
 import           Crypto.Hash
-import           Data.Aeson                 hiding (Options)
-import qualified Data.ByteString.Char8      as SBS
-import qualified Data.ByteString.Lazy.Char8 as LBS
+import           Data.Aeson                       hiding (Options)
+import qualified Data.ByteString.Char8            as SBS
+import qualified Data.ByteString.Lazy.Char8       as LBS
 import           Data.Default
 import           Data.Earnest.Bourse
 import           Data.Earnest.Currency
 import           Data.Earnest.TradeInfo
-import           Data.Hashable              (Hashable)
-import qualified Data.HashMap.Strict        as HM
+import           Data.Hashable                    (Hashable)
+import qualified Data.HashMap.Strict              as HM
 import           Data.Maybe
+import           Data.String.Interpolate.IsString
+import           Earnest.Utils
 import           GHC.Generics
-import           Network.Wreq               (FormParam ((:=)), defaults, header,
-                                             responseBody, responseStatus,
-                                             statusCode)
-import qualified Network.Wreq               as Req
+import           Network.Wreq                     (FormParam ((:=)), defaults,
+                                                   header, responseBody,
+                                                   responseStatus, statusCode)
+import qualified Network.Wreq                     as Req
+import           Prelude                          hiding (last)
 import           System.Posix.Time
-import qualified Text.Read                  as R
+import qualified Text.Read                        as R
 
 -- The programmers that work in AEX are idiots
 
@@ -176,7 +179,7 @@ data Ticker = Ticker { high :: Double
 instance ToJSON Ticker
 instance FromJSON Ticker
 
-ticker :: AEXAPIBourse -> String -> IO (APIResult (HM.HashMap String (HM.HashMap String Ticker)))
+ticker :: AEXAPIBourse -> String -> IO (APIResult (HM.HashMap String Ticker))
 ticker b pricingCoin = do
   r <- Req.get (apis HM.! ("ticker_" ++ pricingCoin))
   let t = r ^. responseBody
@@ -184,7 +187,9 @@ ticker b pricingCoin = do
       respJson = decode t :: Maybe (HM.HashMap String (HM.HashMap String Ticker))
   return $ case respJson of
     Nothing   -> Left (APIFailure s (LBS.unpack t))
-    Just json -> Right (APISuccess s json)
+    Just json -> Right (APISuccess s (normalize json))
+  where
+    normalize = HM.map (\hm -> hm HM.! "ticker")
 
 
 data AEXAPIBourse = AEXAPIBourse { uid  :: String
@@ -198,34 +203,15 @@ instance Bourse AEXAPIBourse where
   loadInfo b = do
     accountBalanceResult <- liftIO $ accountBalance b
     balances <- case accountBalanceResult of
-      Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
+      Left (APIFailure _ msg) -> throwM (LoadInfoFailed msg)
       Right (APISuccess _ d)  -> return $ toBalances d
-
-    tickerCNCResult <- liftIO $ ticker b "cnc"
-    cncCurrencies <- case tickerCNCResult of
-      Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
-      Right (APISuccess _ d)  -> return $ foldMap stc (HM.keys d)
-    let cncCCTIs = map (, CNC, def) cncCurrencies
-    let cncCCTIs' = map (CNC, , def) cncCurrencies
-    tickerUSDTResult <- liftIO $ ticker b "usdt"
-    usdtCurrencies <- case tickerUSDTResult of
-      Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
-      Right (APISuccess _ d)  -> return $ foldMap stc (HM.keys d)
-    let usdtCCTIs = map (, USDT, def) usdtCurrencies
-    let usdtCCTIs' = map (USDT, , def) usdtCurrencies
-    tickerGATResult <- liftIO $ ticker b "gat"
-    gatCurrencies <- case tickerGATResult of
-      Left (APIFailure _ msg) -> liftIO $ throwM (LoadInfoFailed msg)
-      Right (APISuccess _ d)  -> return $ foldMap stc (HM.keys d)
-    let gatCCTIs = map (, GAT, def) gatCurrencies
-    let gatCCTIs' = map (GAT, , def) gatCurrencies
+    cncCCTIs <- loadTickerInfo "cnc"
+    usdtCCTIs <- loadTickerInfo "usdt"
+    gatCCTIs <- loadTickerInfo "gat"
     let tradeInfoTable = flip execState newTradeInfoTable $ do
           merge cncCCTIs
-          merge cncCCTIs'
           merge usdtCCTIs
-          merge usdtCCTIs'
           merge gatCCTIs
-          merge gatCCTIs'
 
     return BourseInfo{ _supportedTrades = tradeInfoTable
                      , _balances = balances
@@ -233,13 +219,33 @@ instance Bourse AEXAPIBourse where
                      }
     where
       keyCurrMap = HM.fromList $ map (first (++ "_balance")) $ HM.toList currencyNameMapping
-      toBalances = HM.foldlWithKey' folder HM.empty
       folder newMap k v = case HM.lookup k keyCurrMap of
         Nothing   -> newMap
         Just curr -> case R.readMaybe v :: Maybe Double of
           Just v' -> HM.insert curr v' newMap
           Nothing -> newMap
+      toBalances = HM.foldlWithKey' folder HM.empty
+      tickerToTI Ticker{..} = def { fee = 0
+                                  , buy = buy
+                                  , sell = sell
+                                  , high = high
+                                  , low = low
+                                  , last = last
+                                  , vol = vol
+                                  , depth = def
+                                  }
+      loadTickerInfo :: ThrowableIO m => String -> m [(Currency, Currency, TradeInfo)]
+      loadTickerInfo currStr = do
+        tickerResult <- liftIO $ ticker b currStr
+        currencies <- case tickerResult of
+          Left (APIFailure _ msg) -> throwM (LoadInfoFailed msg)
+          Right (APISuccess _ d)  -> return $ HM.map tickerToTI d
+        curr <- stc currStr
+        cctis <- mapM (\(c, ti) -> stc c >>= return . (, curr, ti)) $ HM.toList currencies
+        -- FIXME: Inverse of TradeInfo
+        rCCTIs <- mapM (\(c, ti) -> stc c >>= return . (curr, , ti)) $ HM.toList currencies
+        return $ cctis ++ rCCTIs
       stc s = case HM.lookup s currencyNameMapping of
-        Just curr -> [curr]
-        Nothing   -> []
+        Just curr -> return curr
+        Nothing   -> throwM (LoadInfoFailed [i|Invalid currency: #{s}|])
   updateBourseInfo = undefined

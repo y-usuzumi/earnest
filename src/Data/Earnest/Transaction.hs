@@ -6,8 +6,9 @@ import           Control.Monad
 import           Control.Monad.Catch
 import           Control.Monad.IO.Class
 import           Control.Monad.IO.Unlift
+import           Earnest.Utils
 
-newtype Transaction r = Transaction { runTransaction :: forall m. (MonadIO m, MonadThrow m) => m r
+newtype Transaction r = Transaction { runTransaction :: forall m. ThrowableIO m => m r
                                     } deriving Functor
 
 instance Applicative Transaction where
