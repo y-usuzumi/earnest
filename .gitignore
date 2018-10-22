@@ -1,10 +1,13 @@
+# Stack
 .stack-work/
 dist-newstyle/
 earnest.cabal
 *~
-.earnest-config.yaml
-.earnest-config.test.yaml
 
 # Emacs
 .#*
 .dir-locals.el
+
+# Earnest
+.earnest-config.yaml
+.earnest-config.test.yaml
