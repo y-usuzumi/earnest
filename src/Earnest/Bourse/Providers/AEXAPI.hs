@@ -226,12 +226,12 @@ instance Bourse AEXAPIBourse where
           Nothing -> newMap
       toBalances = HM.foldlWithKey' folder HM.empty
       tickerToTI Ticker{..} = def { fee = 0
-                                  , buy = buy
-                                  , sell = sell
-                                  , high = high
-                                  , low = low
-                                  , last = last
-                                  , vol = vol
+                                  , buy
+                                  , sell
+                                  , high
+                                  , low
+                                  , last
+                                  , vol
                                   , depth = def
                                   }
       loadTickerInfo :: ThrowableIO m => String -> m [(Currency, Currency, TradeInfo)]

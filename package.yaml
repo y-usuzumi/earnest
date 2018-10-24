@@ -59,6 +59,7 @@ default-extensions:
 - ImplicitParams
 - LambdaCase
 - MultiParamTypeClasses
+- NamedFieldPuns
 - OverloadedStrings
 - QuasiQuotes
 - PartialTypeSignatures
