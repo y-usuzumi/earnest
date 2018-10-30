@@ -47,6 +47,7 @@ data Currency = AE
               | IDT
               | INF
               | KNC
+              | LFT
               | LTC
               | LXT
               | LBTC
@@ -64,6 +65,7 @@ data Currency = AE
               | OCT
               | OMG
               | OPC
+              | PAX
               | PPC
               | QASH
               | QRK
@@ -77,6 +79,7 @@ data Currency = AE
               | TAC
               | TAG
               | TMC
+              | TUSD
               | TYT
               | UBTC
               | USD
